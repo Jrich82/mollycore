@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOLLY//CORE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --pink: #ff2d78;
+    --pink-dim: #ff2d7833;
+    --cyan: #00f5d4;
+    --cyan-dim: #00f5d422;
+    --gold: #ffd60a;
+    --dark: #0a0a0f;
+    --panel: #0f0f1a;
+    --border: #1e1e3a;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,45,120,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,45,120,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 30px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), #8b00ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 0 30px var(--pink-dim);
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px var(--pink-dim); }
+    50% { box-shadow: 0 0 40px rgba(255,45,120,0.4); }
+  }
+
+  .logo-text h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    color: var(--pink);
+    letter-spacing: 2px;
+  }
+
+  .logo-text p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .stat-pill {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  .stat-pill .label { color: var(--muted); font-size: 0.65rem; display: block; }
+  .stat-pill .value { color: var(--cyan); font-weight: 700; }
+  .stat-pill .value.pink { color: var(--pink); }
+  .stat-pill .value.gold { color: var(--gold); }
+
+  /* Grid layout */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 20px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--pink), transparent);
+    opacity: 0.6;
+  }
+
+  .panel.cyan::before { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+  .panel.gold::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  .panel-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--pink);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  .panel-title .dot.cyan { background: var(--cyan); }
+  .panel-title .dot.gold { background: var(--gold); }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* BTC Price Panel */
+  .btc-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .btc-change {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+
+  .btc-change.up { color: #00ff87; }
+  .btc-change.down { color: var(--pink); }
+
+  .mini-chart {
+    height: 60px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .bar {
+    flex: 1;
+    background: var(--gold);
+    opacity: 0.3;
+    border-radius: 2px 2px 0 0;
+    transition: opacity 0.3s;
+  }
+
+  .bar:hover { opacity: 0.8; }
+  .bar.active { opacity: 0.7; }
+
+  /* Projects panel */
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+
+  .project-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .project-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .project-item:hover {
+    border-color: var(--pink);
+    background: var(--pink-dim);
+    transform: translateX(4px);
+  }
+
+  .project-info { display: flex; align-items: center; gap: 12px; }
+  .project-emoji { font-size: 1.2rem; }
+  .project-name { font-weight: 600; font-size: 0.9rem; }
+  .project-url { font-size: 0.75rem; color: var(--muted); }
+
+  .status-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .status-live { background: rgba(0,255,135,0.15); color: #00ff87; border: 1px solid rgba(0,255,135,0.3); }
+  .status-dev { background: rgba(255,214,10,0.15); color: var(--gold); border: 1px solid rgba(255,214,10,0.3); }
+  .status-paused { background: rgba(107,107,138,0.15); color: var(--muted); border: 1px solid var(--border); }
+  .status-pending { background: rgba(255,45,120,0.15); color: var(--pink); border: 1px solid rgba(255,45,120,0.3); }
+
+  /* Molly chat panel */
+  .chat-area {
+    height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-right: 4px;
+  }
+
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .message {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .msg-avatar.molly { background: linear-gradient(135deg, var(--pink), #8b00ff); }
+  .msg-avatar.jon { background: linear-gradient(135deg, var(--cyan), #0066ff); }
+
+  .msg-bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .message.molly .msg-bubble {
+    background: var(--pink-dim);
+    border: 1px solid rgba(255,45,120,0.2);
+    border-bottom-left-radius: 4px;
+  }
+
+  .message.user .msg-bubble {
+    background: var(--cyan-dim);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-bottom-right-radius: 4px;
+    text-align: right;
+  }
+
+  .chat-input-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input:focus { border-color: var(--pink); }
+  .chat-input::placeholder { color: var(--muted); }
+
+  .send-btn {
+    background: var(--pink);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 700;
+  }
+
+  .send-btn:hover { background: #ff5599; transform: scale(1.05); }
+
+  /* Memory / Training panel */
+  .memory-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .memory-item {
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .memory-item .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* Feedback / Training */
+  .rating-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .rating-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .rating-btn:hover { border-color: var(--cyan); background: var(--cyan-dim); }
+
+  /* Activity feed */
+  .feed-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .feed-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .feed-item:last-child { border-bottom: none; }
+
+  .feed-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    min-width: 70px;
+    padding-top: 2px;
+  }
+
+  .feed-content { font-size: 0.82rem; line-height: 1.4; }
+  .feed-content strong { color: var(--pink); }
+
+  /* Skills / Training meter */
+  .skill-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .skill-item { }
+  .skill-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .skill-label span:last-child {
+    font-family: 'Space Mono', monospace;
+    color: var(--cyan);
+    font-size: 0.75rem;
+  }
+
+  .skill-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .skill-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    transition: width 1.5s ease;
+  }
+
+  /* Scrollbar global */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Glow effects */
+  .glow-text { text-shadow: 0 0 20px currentColor; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 30px 0 10px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .thinking {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .thinking span {
+    width: 6px; height: 6px;
+    background: var(--pink);
+    border-radius: 50%;
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+
+  .thinking span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-8px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="avatar">💋</div>
+      <div class="logo-text">
+        <h1>MOLLY//CORE</h1>
+        <p>Jon's AI Command Center · v2.0</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill">
+        <span class="label">BTC</span>
+        <span class="value gold" id="btc-header">loading...</span>
+      </div>
+      <div class="stat-pill">
+        <span class="label">Status</span>
+        <span class="value" style="color:#00ff87">● ONLINE</span>
+      </div>
+      <div class="stat-pill">
+        <span class="label">Local Time</span>
+        <span class="value pink" id="clock">--:--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="grid">
+
+    <!-- BTC PRICE -->
+    <div class="panel gold">
+      <div class="panel-title"><div class="dot gold"></div>Bitcoin Price</div>
+      <div class="btc-price" id="btc-price">$--,---</div>
+      <div class="btc-change" id="btc-change">loading...</div>
+      <div class="mini-chart" id="mini-chart">
+        <!-- bars generated by JS -->
+      </div>
+    </div>
+
+    <!-- SKILLS / AI OLYMPICS TRAINING -->
+    <div class="panel cyan">
+      <div class="panel-title"><div class="dot cyan"></div>Molly Training — AI Olympics</div>
+      <div class="skill-list">
+        <div class="skill-item">
+          <div class="skill-label"><span>Bitcoin Analysis</span><span>97%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:97%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-label"><span>Code Generation</span><span>91%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:91%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-label"><span>Content Writing</span><span>95%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-label"><span>Trading Strategy</span><span>84%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:84%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-label"><span>OPSEC / Security</span><span>89%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:89%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="panel span-2">
+      <div class="panel-title"><div class="dot"></div>Jon's Empire</div>
+      <div class="project-list">
+        <a href="https://maineiactrader.com" target="_blank" class="project-item">
+          <div class="project-info">
+            <span class="project-emoji">📈</span>
+            <div><div class="project-name">Maineiac Trader</div><div class="project-url">maineiactrader.com</div></div>
+          </div>
+          <span class="status-badge status-live">Live</span>
+        </a>
+        <a href="https://stackerzero.com" target="_blank" class="project-item">
+          <div class="project-info">
+            <span class="project-emoji">₿</span>
+            <div><div class="project-name">StackerZero</div><div class="project-url">stackerzero.com</div></div>
+          </div>
+          <span class="status-badge status-live">Live</span>
+        </a>
+        <a href="https://mollyos.vercel.app" target="_blank" class="project-item">
+          <div class="project-info">
+            <span class="project-emoji">🤖</span>
+            <div><div class="project-name">MOLLY//OS</div><div class="project-url">mollyos.vercel.app</div></div>
+          </div>
+          <span class="status-badge status-live">Live</span>
+        </a>
+        <div class="project-item">
+          <div class="project-info">
+            <span class="project-emoji">👻</span>
+            <div><div class="project-name">gh0st.lol</div><div class="project-url">Deploy pending</div></div>
+          </div>
+          <span class="status-badge status-pending">Deploy</span>
+        </div>
+        <div class="project-item">
+          <div class="project-info">
+            <span class="project-emoji">🎲</span>
+            <div><div class="project-name">CyberDice</div><div class="project-url">cyberdice.io · devnet</div></div>
+          </div>
+          <span class="status-badge status-dev">Devnet</span>
+        </div>
+        <div class="project-item">
+          <div class="project-info">
+            <span class="project-emoji">🔮</span>
+            <div><div class="project-name">Maineiac Mystic</div><div class="project-url">@MaineiacMysticbot</div></div>
+          </div>
+          <span class="status-badge status-live">Live</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOLLY CHAT -->
+    <div class="panel span-2">
+      <div class="panel-title"><div class="dot"></div>Talk to Molly</div>
+      <div class="chat-area" id="chat-area">
+        <div class="message molly">
+          <div class="msg-avatar molly">💋</div>
+          <div class="msg-bubble">Hey Jon! I'm MOLLY//CORE — your command center. I can answer questions about your projects, generate content ideas, or just talk. What do you need?</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" placeholder="Ask Molly anything..." type="text">
+        <button class="send-btn" onclick="sendMessage()">SEND</button>
+      </div>
+    </div>
+
+    <!-- ACTIVITY FEED -->
+    <div class="panel">
+      <div class="panel-title"><div class="dot cyan"></div>Recent Activity</div>
+      <div class="feed-list" id="feed-list">
+        <div class="feed-item">
+          <div class="feed-time">Today</div>
+          <div class="feed-content"><strong>StackerZero</strong> — "Punk Rock + Bitcoin" article published</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-time">Today</div>
+          <div class="feed-content"><strong>TheRuralDegen</strong> — $73K post sent to Telegram</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-time">Today</div>
+          <div class="feed-content"><strong>Josi Bot</strong> — @RollieJoJobot deployed on gaming rig</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-time">Yesterday</div>
+          <div class="feed-content"><strong>Gaming Rig</strong> — rig_agent.py scheduled 7AM/1PM/6PM</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-time">Yesterday</div>
+          <div class="feed-content"><strong>Molly</strong> — Heartbeat reduced 30m → 4h (cost savings)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEEDBACK / TRAINING -->
+    <div class="panel">
+      <div class="panel-title"><div class="dot gold"></div>Train Molly — Rate Last Response</div>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; line-height:1.5">
+        Rating my responses helps me improve. The more you train me, the better I get. This is how you win the AI Olympics.
+      </p>
+      <div id="last-response" style="font-size:0.82rem; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; color:var(--muted);">
+        No recent response to rate yet.
+      </div>
+      <div class="rating-row">
+        <button class="rating-btn" onclick="rate(5)" title="Perfect">🔥</button>
+        <button class="rating-btn" onclick="rate(4)" title="Good">✅</button>
+        <button class="rating-btn" onclick="rate(3)" title="OK">😐</button>
+        <button class="rating-btn" onclick="rate(2)" title="Meh">👎</button>
+        <button class="rating-btn" onclick="rate(1)" title="Wrong">❌</button>
+      </div>
+      <div id="rating-log" style="margin-top:16px; font-size:0.75rem; color:var(--muted); font-family:'Space Mono',monospace;"></div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="panel span-3">
+      <div class="panel-title"><div class="dot"></div>Quick Actions</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('stackerzero')">📝 New SZ Article</button>
+        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('trd')">🦞 TRD Post</button>
+        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('btc')">₿ BTC Analysis</button>
+        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('tiktok')">📱 TikTok Idea</button>
+        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('opsec')">🛡 OPSEC Check</button>
+        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('ideas')">💡 Revenue Ideas</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    MOLLY//CORE · Built with 💋 · Jon's Empire · <span id="date-footer"></span>
+  </div>
+</div>
+
+<script>
+// ── CLOCK ──────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = 
+    now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:true});
+  document.getElementById('date-footer').textContent = 
+    now.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── BTC PRICE ──────────────────────────────────────────────
+async function fetchBTC() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true');
+    const d = await r.json();
+    const price = d.bitcoin.usd;
+    const change = d.bitcoin.usd_24h_change;
+    const fmt = '$' + price.toLocaleString('en-US', {maximumFractionDigits: 0});
+    document.getElementById('btc-price').textContent = fmt;
+    document.getElementById('btc-header').textContent = fmt;
+    const changeEl = document.getElementById('btc-change');
+    const arrow = change >= 0 ? '▲' : '▼';
+    changeEl.textContent = `${arrow} ${Math.abs(change).toFixed(2)}% (24h)`;
+    changeEl.className = 'btc-change ' + (change >= 0 ? 'up' : 'down');
+    generateBars(change);
+  } catch(e) {
+    document.getElementById('btc-price').textContent = '$--,---';
+  }
+}
+
+function generateBars(change) {
+  const chart = document.getElementById('mini-chart');
+  chart.innerHTML = '';
+  const heights = Array.from({length: 20}, () => Math.random() * 0.6 + 0.2);
+  const trend = change >= 0 ? 1 : -1;
+  heights.forEach((h, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'bar' + (i === 19 ? ' active' : '');
+    bar.style.height = (h * 100) + '%';
+    if (change >= 0) bar.style.background = '#00ff87';
+    chart.appendChild(bar);
+  });
+}
+
+fetchBTC();
+setInterval(fetchBTC, 60000);
+
+// ── CHAT ──────────────────────────────────────────────────
+const OLLAMA_URL = 'http://localhost:11434/api/chat';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+const SYSTEM = `You are Molly — Jon's AI assistant. Brilliant, warm, a bit sassy. You're running in MOLLY//CORE, Jon's personal command center. Keep responses concise but helpful. You know all of Jon's projects: Maineiac Trader, StackerZero, gh0st.lol, CyberDice, Maine-iac Munchies, Maineiac Mystic, TheRuralDegen. You care about Bitcoin, privacy tech, and helping Jon build his empire while saving money on AI costs.`;
+
+let chatHistory = [{role:'system', content:SYSTEM}];
+let lastResponse = '';
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  
+  input.value = '';
+  addMessage('user', msg);
+  chatHistory.push({role:'user', content:msg});
+  
+  // Show thinking
+  const thinkId = addThinking();
+  
+  try {
+    // Try Ollama first (local, free)
+    let reply = await tryOllama(msg);
+    removeThinking(thinkId);
+    addMessage('molly', reply);
+    chatHistory.push({role:'assistant', content:reply});
+    lastResponse = reply;
+    document.getElementById('last-response').textContent = reply.substring(0, 120) + (reply.length > 120 ? '...' : '');
+  } catch(e) {
+    removeThinking(thinkId);
+    addMessage('molly', "I can't reach the local Ollama server right now. Make sure Ollama is running on this machine! 💋");
+  }
+}
+
+async function tryOllama(msg) {
+  const r = await fetch(OLLAMA_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model: 'llama3.1:8b',
+      messages: chatHistory,
+      stream: false
+    })
+  });
+  if (!r.ok) throw new Error('Ollama failed');
+  const d = await r.json();
+  return d.message.content;
+}
+
+function addMessage(role, content) {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar ${role === 'molly' ? 'molly' : 'jon'}">${role === 'molly' ? '💋' : '🦞'}</div>
+    <div class="msg-bubble">${content}</div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+function addThinking() {
+  const area = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'message molly';
+  div.id = 'thinking-' + Date.now();
+  div.innerHTML = `
+    <div class="msg-avatar molly">💋</div>
+    <div class="msg-bubble"><div class="thinking"><span></span><span></span><span></span></div></div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div.id;
+}
+
+function removeThinking(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+// Enter key to send
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// ── QUICK ACTIONS ─────────────────────────────────────────
+const quickPrompts = {
+  stackerzero: "Give me a punchy StackerZero article idea for today. Bitcoin angle, personal story hook.",
+  trd: "Write a TheRuralDegen Telegram post with Maine degen energy. Use current BTC at $73K.",
+  btc: "Give me a sharp 3-sentence Bitcoin market analysis right now.",
+  tiktok: "Give Josi 3 TikTok video ideas for Maine-iac Munchies tumblers this week.",
+  opsec: "Run a quick OPSEC check — what should Jon be careful about this week?",
+  ideas: "Give Jon 3 revenue ideas he could start this week with zero upfront cost."
+};
+
+function quickAction(key) {
+  document.getElementById('chat-input').value = quickPrompts[key];
+  sendMessage();
+}
+
+// ── RATING ────────────────────────────────────────────────
+const ratings = JSON.parse(localStorage.getItem('molly-ratings') || '[]');
+
+function rate(score) {
+  const emojis = {5:'🔥 Perfect', 4:'✅ Good', 3:'😐 OK', 2:'👎 Meh', 1:'❌ Wrong'};
+  ratings.push({score, time: new Date().toISOString(), response: lastResponse.substring(0,80)});
+  localStorage.setItem('molly-ratings', JSON.stringify(ratings.slice(-50)));
+  
+  const log = document.getElementById('rating-log');
+  const avg = (ratings.reduce((s,r) => s+r.score, 0) / ratings.length).toFixed(1);
+  log.innerHTML = `Last: ${emojis[score]} · Avg score: ${avg}/5 · Total ratings: ${ratings.length}`;
+}
+
+// Load existing ratings
+if (ratings.length > 0) {
+  const avg = (ratings.reduce((s,r) => s+r.score, 0) / ratings.length).toFixed(1);
+  document.getElementById('rating-log').innerHTML = `Avg score: ${avg}/5 · Total ratings: ${ratings.length}`;
+}
+</script>
+</body>
+</html>
