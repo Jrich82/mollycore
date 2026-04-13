@@ -8,858 +8,715 @@
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
   :root {
-    --pink: #ff2d78;
-    --pink-dim: #ff2d7833;
-    --cyan: #00f5d4;
-    --cyan-dim: #00f5d422;
-    --gold: #ffd60a;
-    --dark: #0a0a0f;
-    --panel: #0f0f1a;
-    --border: #1e1e3a;
-    --text: #e8e8f0;
-    --muted: #6b6b8a;
+    --pink: #ff2d78; --pink-dim: #ff2d7833;
+    --cyan: #00f5d4; --cyan-dim: #00f5d422;
+    --gold: #ffd60a; --green: #00ff87;
+    --dark: #08080f; --panel: #0e0e1a; --border: #1a1a30;
+    --text: #e8e8f0; --muted: #5a5a7a;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
+    background:var(--dark); color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    height:100vh; display:flex; flex-direction:column;
+    overflow:hidden;
   }
 
-  /* Grid background */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: 
-      linear-gradient(rgba(255,45,120,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,45,120,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:linear-gradient(rgba(255,45,120,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,45,120,0.025) 1px,transparent 1px);
+    background-size:36px 36px;
   }
 
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
+  /* ── TOPBAR ── */
+  .topbar {
+    position:relative; z-index:10;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; height:56px;
+    background:rgba(8,8,15,0.95); border-bottom:1px solid var(--border);
+    backdrop-filter:blur(20px); flex-shrink:0;
   }
 
-  /* Header */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 0 30px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 30px;
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg,var(--pink),#8b00ff);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; box-shadow:0 0 20px rgba(255,45,120,0.4);
+    animation:glow 3s ease-in-out infinite; flex-shrink:0;
+  }
+  @keyframes glow { 0%,100%{box-shadow:0 0 15px rgba(255,45,120,0.3);} 50%{box-shadow:0 0 30px rgba(255,45,120,0.6);} }
+  .logo-name { font-family:'Space Mono',monospace; font-size:1rem; color:var(--pink); letter-spacing:2px; }
+
+  .topbar-center { display:flex; gap:4px; }
+  .tab-btn {
+    padding:6px 14px; border-radius:8px; border:none;
+    background:transparent; color:var(--muted);
+    font-family:'Space Mono',monospace; font-size:0.68rem;
+    letter-spacing:1px; cursor:pointer; transition:all 0.2s;
+    text-transform:uppercase;
+  }
+  .tab-btn:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+  .tab-btn.active { color:var(--pink); background:rgba(255,45,120,0.1); }
+
+  .topbar-right { display:flex; gap:12px; align-items:center; }
+  .stat-chip {
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:20px; padding:5px 12px;
+    font-family:'Space Mono',monospace; font-size:0.72rem;
+  }
+  .stat-chip .v { color:var(--gold); font-weight:700; }
+  .stat-chip .v.g { color:var(--green); }
+  .stat-chip .v.p { color:var(--pink); }
+
+  /* ── MAIN AREA ── */
+  .main {
+    flex:1; overflow:hidden; position:relative; z-index:1;
+    display:flex; flex-direction:column;
   }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
+  .tab-pane { display:none; height:100%; overflow-y:auto; padding:16px 20px; }
+  .tab-pane.active { display:block; }
+  .tab-pane::-webkit-scrollbar { width:5px; }
+  .tab-pane::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-  .avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--pink), #8b00ff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 0 30px var(--pink-dim);
-    animation: pulse 3s ease-in-out infinite;
-  }
+  /* ── GRID HELPERS ── */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+  .g4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+  .s2 { grid-column:span 2; }
+  .s3 { grid-column:span 3; }
 
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 20px var(--pink-dim); }
-    50% { box-shadow: 0 0 40px rgba(255,45,120,0.4); }
-  }
-
-  .logo-text h1 {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.4rem;
-    color: var(--pink);
-    letter-spacing: 2px;
-  }
-
-  .logo-text p {
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .header-stats {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-  }
-
-  .stat-pill {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-  }
-
-  .stat-pill .label { color: var(--muted); font-size: 0.65rem; display: block; }
-  .stat-pill .value { color: var(--cyan); font-weight: 700; }
-  .stat-pill .value.pink { color: var(--pink); }
-  .stat-pill .value.gold { color: var(--gold); }
-
-  /* Grid layout */
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto;
-    gap: 20px;
-  }
-
+  /* ── PANELS ── */
   .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:16px; position:relative; overflow:hidden;
   }
+  .panel::before { content:''; position:absolute; top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--pink),transparent); opacity:0.7; }
+  .panel.c::before { background:linear-gradient(90deg,transparent,var(--cyan),transparent); }
+  .panel.g::before { background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+  .panel.p::before { background:linear-gradient(90deg,transparent,#8b00ff,transparent); }
+  .panel.gr::before { background:linear-gradient(90deg,transparent,var(--green),transparent); }
 
-  .panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--pink), transparent);
-    opacity: 0.6;
+  .ptitle {
+    font-family:'Space Mono',monospace; font-size:0.62rem;
+    color:var(--muted); text-transform:uppercase; letter-spacing:2px;
+    margin-bottom:12px; display:flex; align-items:center; gap:6px;
   }
+  .dot { width:5px;height:5px;border-radius:50%;background:var(--pink);animation:blink 2s ease-in-out infinite; }
+  .dot.c{background:var(--cyan);} .dot.g{background:var(--gold);}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
 
-  .panel.cyan::before { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
-  .panel.gold::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  /* ── BTC PANEL ── */
+  .btc-big { font-family:'Space Mono',monospace; font-size:2rem; font-weight:700; color:var(--gold); line-height:1; }
+  .btc-change { font-family:'Space Mono',monospace; font-size:0.85rem; margin:4px 0 10px; }
+  .btc-change.up{color:var(--green);} .btc-change.dn{color:var(--pink);}
+  .spark { height:40px; display:flex; align-items:flex-end; gap:2px; }
+  .bar { flex:1; border-radius:2px 2px 0 0; opacity:0.5; background:var(--gold); transition:opacity 0.2s; }
+  .bar:hover{opacity:1;}
 
-  .panel-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  /* ── PROJECT ITEMS ── */
+  .proj-list { display:flex; flex-direction:column; gap:7px; }
+  .proj {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; background:rgba(255,255,255,0.02);
+    border:1px solid var(--border); border-radius:9px;
+    transition:all 0.2s; cursor:pointer; text-decoration:none; color:inherit;
   }
-
-  .panel-title .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--pink);
-    animation: blink 2s ease-in-out infinite;
+  .proj:hover { border-color:var(--pink); transform:translateX(3px); background:var(--pink-dim); }
+  .proj-left { display:flex; align-items:center; gap:10px; }
+  .proj-emoji { font-size:1.1rem; }
+  .proj-name { font-weight:600; font-size:0.82rem; }
+  .proj-url { font-size:0.65rem; color:var(--muted); }
+  .badge {
+    font-family:'Space Mono',monospace; font-size:0.6rem;
+    padding:2px 8px; border-radius:10px; font-weight:700; letter-spacing:1px;
   }
+  .live{background:rgba(0,255,135,0.12);color:var(--green);border:1px solid rgba(0,255,135,0.3);}
+  .dev{background:rgba(255,214,10,0.12);color:var(--gold);border:1px solid rgba(255,214,10,0.3);}
+  .pend{background:rgba(255,45,120,0.12);color:var(--pink);border:1px solid rgba(255,45,120,0.3);}
+  .paused{background:rgba(90,90,122,0.12);color:var(--muted);border:1px solid var(--border);}
 
-  .panel-title .dot.cyan { background: var(--cyan); }
-  .panel-title .dot.gold { background: var(--gold); }
+  /* ── SKILLS ── */
+  .skill-list { display:flex; flex-direction:column; gap:10px; }
+  .skill-lbl { display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px; }
+  .skill-lbl span:last-child { font-family:'Space Mono',monospace; color:var(--cyan); font-size:0.7rem; }
+  .skill-bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .skill-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--pink),var(--cyan)); }
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+  /* ── FEED ── */
+  .feed { display:flex; flex-direction:column; }
+  .feed-item { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.78rem; }
+  .feed-item:last-child{border:none;}
+  .feed-time { font-family:'Space Mono',monospace; font-size:0.62rem; color:var(--muted); min-width:55px; padding-top:2px; }
+  .feed-item strong { color:var(--pink); }
+
+  /* ── CHAT TAB ── */
+  .chat-wrap { display:flex; flex-direction:column; height:calc(100vh - 56px - 32px); }
+  .chat-msgs { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding-bottom:12px; }
+  .chat-msgs::-webkit-scrollbar{width:4px;}
+  .chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  .cmsg { display:flex; gap:10px; align-items:flex-start; animation:fi 0.3s ease; max-width:80%; }
+  @keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .cmsg.u { flex-direction:row-reverse; align-self:flex-end; }
+  .cav { width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px; }
+  .cav.m{background:linear-gradient(135deg,var(--pink),#8b00ff);}
+  .cav.u{background:linear-gradient(135deg,#0066ff,var(--cyan));}
+  .cbubble { padding:9px 13px; border-radius:13px; font-size:0.82rem; line-height:1.5; }
+  .cmsg.m .cbubble { background:var(--pink-dim); border:1px solid rgba(255,45,120,0.2); border-bottom-left-radius:3px; }
+  .cmsg.u .cbubble { background:var(--cyan-dim); border:1px solid rgba(0,245,212,0.2); border-bottom-right-radius:3px; }
+  .chat-input-row { display:flex; gap:8px; padding-top:10px; border-top:1px solid var(--border); }
+  .cinput {
+    flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:10px; padding:10px 14px; color:var(--text);
+    font-family:'Space Grotesk',sans-serif; font-size:0.85rem; outline:none;
+    transition:border-color 0.2s;
   }
-
-  /* BTC Price Panel */
-  .btc-price {
-    font-family: 'Space Mono', monospace;
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: var(--gold);
-    line-height: 1;
-    margin-bottom: 8px;
+  .cinput:focus{border-color:var(--pink);}
+  .cinput::placeholder{color:var(--muted);}
+  .csend {
+    background:var(--pink); border:none; border-radius:10px;
+    padding:10px 18px; color:white; font-family:'Space Mono',monospace;
+    font-size:0.75rem; cursor:pointer; transition:all 0.2s; font-weight:700;
   }
-
-  .btc-change {
-    font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    margin-bottom: 16px;
+  .csend:hover{transform:scale(1.05);box-shadow:0 4px 15px rgba(255,45,120,0.4);}
+  .qps { display:flex; gap:6px; flex-wrap:wrap; padding-bottom:8px; }
+  .qp {
+    padding:4px 10px; border-radius:16px; border:1px solid var(--border);
+    font-size:0.68rem; color:var(--muted); cursor:pointer; transition:all 0.2s;
+    background:transparent; font-family:'Space Grotesk',sans-serif;
   }
+  .qp:hover{border-color:var(--pink);color:var(--pink);}
+  .typing span{width:6px;height:6px;background:var(--pink);border-radius:50%;display:inline-block;animation:td 1.2s ease-in-out infinite;margin-right:2px;}
+  .typing span:nth-child(2){animation-delay:0.2s;}.typing span:nth-child(3){animation-delay:0.4s;}
+  @keyframes td{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
 
-  .btc-change.up { color: #00ff87; }
-  .btc-change.down { color: var(--pink); }
-
-  .mini-chart {
-    height: 60px;
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
+  /* ── PUBLISH TAB ── */
+  .topic-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .tbtn {
+    padding:10px 8px; border-radius:10px; border:1px solid var(--border);
+    background:rgba(255,255,255,0.02); color:var(--text);
+    font-family:'Space Grotesk',sans-serif; font-size:0.72rem;
+    cursor:pointer; transition:all 0.2s; text-align:center;
   }
-
-  .bar {
-    flex: 1;
-    background: var(--gold);
-    opacity: 0.3;
-    border-radius: 2px 2px 0 0;
-    transition: opacity 0.3s;
+  .tbtn:hover{border-color:var(--pink);background:rgba(255,45,120,0.08);}
+  .tbtn.sel{border-color:var(--pink);background:rgba(255,45,120,0.15);color:var(--pink);}
+  .tbtn .ti{font-size:1.2rem;display:block;margin-bottom:3px;}
+  .tbtn .tl{font-weight:600;font-size:0.72rem;}
+  .tinput {
+    width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:9px; padding:10px 14px; color:var(--text);
+    font-family:'Space Grotesk',sans-serif; font-size:0.82rem; outline:none;
+    transition:border-color 0.2s; margin-bottom:10px;
   }
-
-  .bar:hover { opacity: 0.8; }
-  .bar.active { opacity: 0.7; }
-
-  /* Projects panel */
-  .span-2 { grid-column: span 2; }
-  .span-3 { grid-column: span 3; }
-
-  .project-list { display: flex; flex-direction: column; gap: 10px; }
-
-  .project-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    transition: all 0.2s;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
+  .tinput:focus{border-color:var(--pink);}
+  .tinput::placeholder{color:var(--muted);}
+  .abtn {
+    padding:9px 20px; border-radius:9px; border:none;
+    font-family:'Space Mono',monospace; font-size:0.72rem; font-weight:700;
+    cursor:pointer; transition:all 0.2s; letter-spacing:1px;
   }
-
-  .project-item:hover {
-    border-color: var(--pink);
-    background: var(--pink-dim);
-    transform: translateX(4px);
+  .abtn.pk{background:var(--pink);color:white;}
+  .abtn.pk:hover{transform:scale(1.03);box-shadow:0 4px 15px rgba(255,45,120,0.4);}
+  .abtn.sc{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text);}
+  .abtn.sc:hover{border-color:var(--cyan);color:var(--cyan);}
+  .sbox {
+    background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:9px;
+    padding:12px; font-family:'Space Mono',monospace; font-size:0.72rem;
+    min-height:50px; color:var(--muted); line-height:1.6; margin-top:10px;
+    max-height:120px; overflow-y:auto;
   }
-
-  .project-info { display: flex; align-items: center; gap: 12px; }
-  .project-emoji { font-size: 1.2rem; }
-  .project-name { font-weight: 600; font-size: 0.9rem; }
-  .project-url { font-size: 0.75rem; color: var(--muted); }
-
-  .status-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+  .sbox .ok{color:var(--green);}.sbox .err{color:var(--pink);}.sbox .inf{color:var(--cyan);}
+  .trd-textarea {
+    width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:9px; padding:10px 14px; color:var(--text);
+    font-family:'Space Grotesk',sans-serif; font-size:0.82rem; outline:none;
+    resize:vertical; min-height:70px; margin-bottom:10px; transition:border-color 0.2s;
   }
+  .trd-textarea:focus{border-color:var(--cyan);}
+  .trd-textarea::placeholder{color:var(--muted);}
 
-  .status-live { background: rgba(0,255,135,0.15); color: #00ff87; border: 1px solid rgba(0,255,135,0.3); }
-  .status-dev { background: rgba(255,214,10,0.15); color: var(--gold); border: 1px solid rgba(255,214,10,0.3); }
-  .status-paused { background: rgba(107,107,138,0.15); color: var(--muted); border: 1px solid var(--border); }
-  .status-pending { background: rgba(255,45,120,0.15); color: var(--pink); border: 1px solid rgba(255,45,120,0.3); }
-
-  /* Molly chat panel */
-  .chat-area {
-    height: 280px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding-right: 4px;
+  /* ── CHECKLIST TAB ── */
+  .cl-item {
+    display:flex; align-items:center; gap:10px; padding:9px 12px;
+    background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    border-radius:9px; cursor:pointer; transition:all 0.2s; margin-bottom:6px;
   }
+  .cl-item:hover{background:rgba(255,255,255,0.04);}
+  .cl-item.done{opacity:0.45;}
+  .cl-item.done .cl-name{text-decoration:line-through;}
+  .cl-circle{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all 0.2s;}
+  .cl-item.done .cl-circle{background:var(--green);border-color:var(--green);color:var(--dark);}
+  .cl-name{flex:1;font-size:0.8rem;}
+  .cl-p{font-family:'Space Mono',monospace;font-size:0.58rem;padding:2px 7px;border-radius:8px;}
+  .ph{background:rgba(255,45,120,0.12);color:var(--pink);border:1px solid rgba(255,45,120,0.3);}
+  .pw{background:rgba(255,214,10,0.12);color:var(--gold);border:1px solid rgba(255,214,10,0.3);}
+  .pq{background:rgba(90,90,122,0.12);color:var(--muted);border:1px solid var(--border);}
 
-  .chat-area::-webkit-scrollbar { width: 4px; }
-  .chat-area::-webkit-scrollbar-track { background: transparent; }
-  .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  /* ── RPG MINI ── */
+  .xp-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:8px 0;}
+  .xp-fill{height:100%;background:linear-gradient(90deg,#8b00ff,var(--pink),var(--gold));border-radius:4px;}
+  .skill-tree-mini{display:flex;flex-direction:column;gap:8px;}
+  .snode{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:rgba(255,255,255,0.02);cursor:pointer;transition:all 0.2s;font-size:0.78rem;}
+  .snode:hover{border-color:#8b00ff;background:rgba(139,0,255,0.08);}
+  .snode.ul{border-color:rgba(0,255,135,0.4);background:rgba(0,255,135,0.04);}
+  .snode-xp{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--gold);margin-left:auto;}
 
-  .message {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  .message.user { flex-direction: row-reverse; }
-
-  .msg-avatar {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-  }
-
-  .msg-avatar.molly { background: linear-gradient(135deg, var(--pink), #8b00ff); }
-  .msg-avatar.jon { background: linear-gradient(135deg, var(--cyan), #0066ff); }
-
-  .msg-bubble {
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: 14px;
-    font-size: 0.85rem;
-    line-height: 1.5;
-  }
-
-  .message.molly .msg-bubble {
-    background: var(--pink-dim);
-    border: 1px solid rgba(255,45,120,0.2);
-    border-bottom-left-radius: 4px;
-  }
-
-  .message.user .msg-bubble {
-    background: var(--cyan-dim);
-    border: 1px solid rgba(0,245,212,0.2);
-    border-bottom-right-radius: 4px;
-    text-align: right;
-  }
-
-  .chat-input-row {
-    display: flex;
-    gap: 10px;
-  }
-
-  .chat-input {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .chat-input:focus { border-color: var(--pink); }
-  .chat-input::placeholder { color: var(--muted); }
-
-  .send-btn {
-    background: var(--pink);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 18px;
-    color: white;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 700;
-  }
-
-  .send-btn:hover { background: #ff5599; transform: scale(1.05); }
-
-  /* Memory / Training panel */
-  .memory-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .memory-item {
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.8rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .memory-item .tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--cyan);
-    background: var(--cyan-dim);
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
-
-  /* Feedback / Training */
-  .rating-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  .rating-btn {
-    flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .rating-btn:hover { border-color: var(--cyan); background: var(--cyan-dim); }
-
-  /* Activity feed */
-  .feed-list { display: flex; flex-direction: column; gap: 10px; }
-
-  .feed-item {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .feed-item:last-child { border-bottom: none; }
-
-  .feed-time {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    min-width: 70px;
-    padding-top: 2px;
-  }
-
-  .feed-content { font-size: 0.82rem; line-height: 1.4; }
-  .feed-content strong { color: var(--pink); }
-
-  /* Skills / Training meter */
-  .skill-list { display: flex; flex-direction: column; gap: 12px; }
-
-  .skill-item { }
-  .skill-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    margin-bottom: 6px;
-  }
-
-  .skill-label span:last-child {
-    font-family: 'Space Mono', monospace;
-    color: var(--cyan);
-    font-size: 0.75rem;
-  }
-
-  .skill-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .skill-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, var(--pink), var(--cyan));
-    transition: width 1.5s ease;
-  }
-
-  /* Scrollbar global */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--dark); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  /* Glow effects */
-  .glow-text { text-shadow: 0 0 20px currentColor; }
-
-  /* Footer */
-  .footer {
-    text-align: center;
-    padding: 30px 0 10px;
-    color: var(--muted);
-    font-size: 0.75rem;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .thinking {
-    display: inline-flex;
-    gap: 4px;
-    align-items: center;
-  }
-
-  .thinking span {
-    width: 6px; height: 6px;
-    background: var(--pink);
-    border-radius: 50%;
-    animation: bounce 1.2s ease-in-out infinite;
-  }
-
-  .thinking span:nth-child(2) { animation-delay: 0.2s; }
-  .thinking span:nth-child(3) { animation-delay: 0.4s; }
-
-  @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-8px); }
-  }
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,#8b00ff,var(--pink));color:white;padding:12px 20px;border-radius:12px;font-family:'Space Mono',monospace;font-size:0.85rem;font-weight:700;box-shadow:0 8px 30px rgba(255,45,120,0.4);transform:translateY(80px);opacity:0;transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);z-index:100;}
+  .toast.show{transform:translateY(0);opacity:1;}
 </style>
 </head>
 <body>
 
-<div class="container">
-
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">
-      <div class="avatar">💋</div>
-      <div class="logo-text">
-        <h1>MOLLY//CORE</h1>
-        <p>Jon's AI Command Center · v2.0</p>
-      </div>
-    </div>
-    <div class="header-stats">
-      <div class="stat-pill">
-        <span class="label">BTC</span>
-        <span class="value gold" id="btc-header">loading...</span>
-      </div>
-      <div class="stat-pill">
-        <span class="label">Status</span>
-        <span class="value" style="color:#00ff87">● ONLINE</span>
-      </div>
-      <div class="stat-pill">
-        <span class="label">Local Time</span>
-        <span class="value pink" id="clock">--:--</span>
-      </div>
-    </div>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">💋</div>
+    <div class="logo-name">MOLLY//CORE</div>
   </div>
-
-  <!-- MAIN GRID -->
-  <div class="grid">
-
-    <!-- BTC PRICE -->
-    <div class="panel gold">
-      <div class="panel-title"><div class="dot gold"></div>Bitcoin Price</div>
-      <div class="btc-price" id="btc-price">$--,---</div>
-      <div class="btc-change" id="btc-change">loading...</div>
-      <div class="mini-chart" id="mini-chart">
-        <!-- bars generated by JS -->
-      </div>
-    </div>
-
-    <!-- SKILLS / AI OLYMPICS TRAINING -->
-    <div class="panel cyan">
-      <div class="panel-title"><div class="dot cyan"></div>Molly Training — AI Olympics</div>
-      <div class="skill-list">
-        <div class="skill-item">
-          <div class="skill-label"><span>Bitcoin Analysis</span><span>97%</span></div>
-          <div class="skill-bar"><div class="skill-fill" style="width:97%"></div></div>
-        </div>
-        <div class="skill-item">
-          <div class="skill-label"><span>Code Generation</span><span>91%</span></div>
-          <div class="skill-bar"><div class="skill-fill" style="width:91%"></div></div>
-        </div>
-        <div class="skill-item">
-          <div class="skill-label"><span>Content Writing</span><span>95%</span></div>
-          <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
-        </div>
-        <div class="skill-item">
-          <div class="skill-label"><span>Trading Strategy</span><span>84%</span></div>
-          <div class="skill-bar"><div class="skill-fill" style="width:84%"></div></div>
-        </div>
-        <div class="skill-item">
-          <div class="skill-label"><span>OPSEC / Security</span><span>89%</span></div>
-          <div class="skill-bar"><div class="skill-fill" style="width:89%"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PROJECTS -->
-    <div class="panel span-2">
-      <div class="panel-title"><div class="dot"></div>Jon's Empire</div>
-      <div class="project-list">
-        <a href="https://maineiactrader.com" target="_blank" class="project-item">
-          <div class="project-info">
-            <span class="project-emoji">📈</span>
-            <div><div class="project-name">Maineiac Trader</div><div class="project-url">maineiactrader.com</div></div>
-          </div>
-          <span class="status-badge status-live">Live</span>
-        </a>
-        <a href="https://stackerzero.com" target="_blank" class="project-item">
-          <div class="project-info">
-            <span class="project-emoji">₿</span>
-            <div><div class="project-name">StackerZero</div><div class="project-url">stackerzero.com</div></div>
-          </div>
-          <span class="status-badge status-live">Live</span>
-        </a>
-        <a href="https://mollyos.vercel.app" target="_blank" class="project-item">
-          <div class="project-info">
-            <span class="project-emoji">🤖</span>
-            <div><div class="project-name">MOLLY//OS</div><div class="project-url">mollyos.vercel.app</div></div>
-          </div>
-          <span class="status-badge status-live">Live</span>
-        </a>
-        <div class="project-item">
-          <div class="project-info">
-            <span class="project-emoji">👻</span>
-            <div><div class="project-name">gh0st.lol</div><div class="project-url">Deploy pending</div></div>
-          </div>
-          <span class="status-badge status-pending">Deploy</span>
-        </div>
-        <div class="project-item">
-          <div class="project-info">
-            <span class="project-emoji">🎲</span>
-            <div><div class="project-name">CyberDice</div><div class="project-url">cyberdice.io · devnet</div></div>
-          </div>
-          <span class="status-badge status-dev">Devnet</span>
-        </div>
-        <div class="project-item">
-          <div class="project-info">
-            <span class="project-emoji">🔮</span>
-            <div><div class="project-name">Maineiac Mystic</div><div class="project-url">@MaineiacMysticbot</div></div>
-          </div>
-          <span class="status-badge status-live">Live</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- MOLLY CHAT -->
-    <div class="panel span-2">
-      <div class="panel-title"><div class="dot"></div>Talk to Molly</div>
-      <div class="chat-area" id="chat-area">
-        <div class="message molly">
-          <div class="msg-avatar molly">💋</div>
-          <div class="msg-bubble">Hey Jon! I'm MOLLY//CORE — your command center. I can answer questions about your projects, generate content ideas, or just talk. What do you need?</div>
-        </div>
-      </div>
-      <div class="chat-input-row">
-        <input class="chat-input" id="chat-input" placeholder="Ask Molly anything..." type="text">
-        <button class="send-btn" onclick="sendMessage()">SEND</button>
-      </div>
-    </div>
-
-    <!-- ACTIVITY FEED -->
-    <div class="panel">
-      <div class="panel-title"><div class="dot cyan"></div>Recent Activity</div>
-      <div class="feed-list" id="feed-list">
-        <div class="feed-item">
-          <div class="feed-time">Today</div>
-          <div class="feed-content"><strong>StackerZero</strong> — "Punk Rock + Bitcoin" article published</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-time">Today</div>
-          <div class="feed-content"><strong>TheRuralDegen</strong> — $73K post sent to Telegram</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-time">Today</div>
-          <div class="feed-content"><strong>Josi Bot</strong> — @RollieJoJobot deployed on gaming rig</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-time">Yesterday</div>
-          <div class="feed-content"><strong>Gaming Rig</strong> — rig_agent.py scheduled 7AM/1PM/6PM</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-time">Yesterday</div>
-          <div class="feed-content"><strong>Molly</strong> — Heartbeat reduced 30m → 4h (cost savings)</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FEEDBACK / TRAINING -->
-    <div class="panel">
-      <div class="panel-title"><div class="dot gold"></div>Train Molly — Rate Last Response</div>
-      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; line-height:1.5">
-        Rating my responses helps me improve. The more you train me, the better I get. This is how you win the AI Olympics.
-      </p>
-      <div id="last-response" style="font-size:0.82rem; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; color:var(--muted);">
-        No recent response to rate yet.
-      </div>
-      <div class="rating-row">
-        <button class="rating-btn" onclick="rate(5)" title="Perfect">🔥</button>
-        <button class="rating-btn" onclick="rate(4)" title="Good">✅</button>
-        <button class="rating-btn" onclick="rate(3)" title="OK">😐</button>
-        <button class="rating-btn" onclick="rate(2)" title="Meh">👎</button>
-        <button class="rating-btn" onclick="rate(1)" title="Wrong">❌</button>
-      </div>
-      <div id="rating-log" style="margin-top:16px; font-size:0.75rem; color:var(--muted); font-family:'Space Mono',monospace;"></div>
-    </div>
-
-    <!-- QUICK ACTIONS -->
-    <div class="panel span-3">
-      <div class="panel-title"><div class="dot"></div>Quick Actions</div>
-      <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('stackerzero')">📝 New SZ Article</button>
-        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('trd')">🦞 TRD Post</button>
-        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('btc')">₿ BTC Analysis</button>
-        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('tiktok')">📱 TikTok Idea</button>
-        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('opsec')">🛡 OPSEC Check</button>
-        <button class="rating-btn" style="flex:none; padding:10px 20px; font-size:0.82rem;" onclick="quickAction('ideas')">💡 Revenue Ideas</button>
-      </div>
-    </div>
-
+  <div class="topbar-center">
+    <button class="tab-btn active" onclick="tab('home',this)">⌂ Home</button>
+    <button class="tab-btn" onclick="tab('chat',this)">💋 Chat</button>
+    <button class="tab-btn" onclick="tab('publish',this)">📝 Publish</button>
+    <button class="tab-btn" onclick="tab('checklist',this)">✅ Tasks</button>
+    <button class="tab-btn" onclick="tab('rpg',this)">⚔ RPG</button>
   </div>
-
-  <div class="footer">
-    MOLLY//CORE · Built with 💋 · Jon's Empire · <span id="date-footer"></span>
+  <div class="topbar-right">
+    <div class="stat-chip"><span class="v g" id="h-btc">--</span> BTC</div>
+    <div class="stat-chip"><span class="v" id="h-clock">--:--</span></div>
+    <div class="stat-chip"><span class="v p">● ON</span></div>
   </div>
 </div>
 
-<script>
-// ── CLOCK ──────────────────────────────────────────────────
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = 
-    now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:true});
-  document.getElementById('date-footer').textContent = 
-    now.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-}
-setInterval(updateClock, 1000);
-updateClock();
+<!-- MAIN -->
+<div class="main">
 
-// ── BTC PRICE ──────────────────────────────────────────────
+  <!-- HOME TAB -->
+  <div class="tab-pane active" id="tab-home">
+    <div class="g4">
+      <!-- BTC -->
+      <div class="panel g">
+        <div class="ptitle"><div class="dot g"></div>Bitcoin</div>
+        <div class="btc-big" id="btc-price">$--,---</div>
+        <div class="btc-change" id="btc-change">loading...</div>
+        <div class="spark" id="spark"></div>
+      </div>
+      <!-- Skills -->
+      <div class="panel c">
+        <div class="ptitle"><div class="dot c"></div>Molly Skills</div>
+        <div class="skill-list">
+          <div><div class="skill-lbl"><span>Bitcoin Analysis</span><span>97%</span></div><div class="skill-bar"><div class="skill-fill" style="width:97%"></div></div></div>
+          <div><div class="skill-lbl"><span>Content Writing</span><span>95%</span></div><div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div></div>
+          <div><div class="skill-lbl"><span>Coding</span><span>91%</span></div><div class="skill-bar"><div class="skill-fill" style="width:91%"></div></div></div>
+          <div><div class="skill-lbl"><span>Trading Strategy</span><span>84%</span></div><div class="skill-bar"><div class="skill-fill" style="width:84%"></div></div></div>
+          <div><div class="skill-lbl"><span>OPSEC</span><span>89%</span></div><div class="skill-bar"><div class="skill-fill" style="width:89%"></div></div></div>
+        </div>
+      </div>
+      <!-- Activity -->
+      <div class="panel s2">
+        <div class="ptitle"><div class="dot c"></div>Recent Activity</div>
+        <div class="feed">
+          <div class="feed-item"><div class="feed-time">Today</div><div><strong>StackerZero</strong> — "Punk Rock + Bitcoin" live</div></div>
+          <div class="feed-item"><div class="feed-time">Today</div><div><strong>TheRuralDegen</strong> — $73K post sent</div></div>
+          <div class="feed-item"><div class="feed-time">Today</div><div><strong>Josi Bot</strong> — @RollieJoJobot deployed</div></div>
+          <div class="feed-item"><div class="feed-time">Yesterday</div><div><strong>Gaming Rig</strong> — rig_agent.py 7AM/1PM/6PM live</div></div>
+          <div class="feed-item"><div class="feed-time">Yesterday</div><div><strong>Molly</strong> — Heartbeat 30m→4h (cost cut 85%)</div></div>
+          <div class="feed-item"><div class="feed-time">Apr 5</div><div><strong>StackerZero</strong> — "I Work Maintenance. I Stack Sats."</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="g2">
+      <div class="panel">
+        <div class="ptitle"><div class="dot"></div>Active Projects</div>
+        <div class="proj-list">
+          <a href="https://maineiactrader.com" target="_blank" class="proj"><div class="proj-left"><span class="proj-emoji">📈</span><div><div class="proj-name">Maineiac Trader</div><div class="proj-url">maineiactrader.com</div></div></div><span class="badge live">Live</span></a>
+          <a href="https://stackerzero.com" target="_blank" class="proj"><div class="proj-left"><span class="proj-emoji">₿</span><div><div class="proj-name">StackerZero</div><div class="proj-url">stackerzero.com</div></div></div><span class="badge live">Live</span></a>
+          <a href="https://mollyos.vercel.app" target="_blank" class="proj"><div class="proj-left"><span class="proj-emoji">🤖</span><div><div class="proj-name">MOLLY//OS</div><div class="proj-url">mollyos.vercel.app</div></div></div><span class="badge live">Live</span></a>
+          <div class="proj"><div class="proj-left"><span class="proj-emoji">👻</span><div><div class="proj-name">gh0st.lol</div><div class="proj-url">Deploy pending</div></div></div><span class="badge pend">Deploy</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ptitle"><div class="dot"></div>More Projects</div>
+        <div class="proj-list">
+          <div class="proj"><div class="proj-left"><span class="proj-emoji">🔮</span><div><div class="proj-name">Maineiac Mystic</div><div class="proj-url">@MaineiacMysticbot</div></div></div><span class="badge live">Live</span></div>
+          <div class="proj"><div class="proj-left"><span class="proj-emoji">🎲</span><div><div class="proj-name">CyberDice</div><div class="proj-url">cyberdice.io</div></div></div><span class="badge dev">Devnet</span></div>
+          <div class="proj"><div class="proj-left"><span class="proj-emoji">🦞</span><div><div class="proj-name">TheRuralDegen</div><div class="proj-url">Auto-posting 3x/day</div></div></div><span class="badge live">Live</span></div>
+          <div class="proj"><div class="proj-left"><span class="proj-emoji">💕</span><div><div class="proj-name">Josi Bot</div><div class="proj-url">@RollieJoJobot</div></div></div><span class="badge live">Live</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT TAB -->
+  <div class="tab-pane" id="tab-chat">
+    <div class="chat-wrap">
+      <div class="qps">
+        <button class="qp" onclick="qsend(`What should I focus on today?`)">🎯 Today's focus</button>
+        <button class="qp" onclick="qsend(`Give me a StackerZero article idea`)">✍️ Article idea</button>
+        <button class="qp" onclick="qsend(`How do I get my first Maineiac Trader customer?`)">💰 First customer</button>
+        <button class="qp" onclick="qsend(`Give me a TheRuralDegen post for right now`)">🦞 TRD post</button>
+        <button class="qp" onclick="qsend(`What should I study for cybersecurity today?`)">🔐 Study tip</button>
+        <button class="qp" onclick="qsend(`What's the fastest way to make money this week?`)">⚡ Make money</button>
+      </div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input class="cinput" id="cinput" placeholder="Talk to Molly..." type="text">
+        <button class="csend" onclick="csend()">SEND</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLISH TAB -->
+  <div class="tab-pane" id="tab-publish">
+    <div class="g2">
+      <div class="panel">
+        <div class="ptitle"><div class="dot"></div>StackerZero Publisher</div>
+        <div class="topic-grid">
+          <button class="tbtn" onclick="selTopic(this,`Bitcoin price action and market psychology — Maine degen angle`)"><span class="ti">₿</span><span class="tl">BTC Market Take</span></button>
+          <button class="tbtn" onclick="selTopic(this,`Quantum computing threat to Bitcoin and BIP-360`)"><span class="ti">⚛️</span><span class="tl">Quantum + BIP-360</span></button>
+          <button class="tbtn" onclick="selTopic(this,`Building crypto tools as a working-class person in rural Maine`)"><span class="ti">🦞</span><span class="tl">Maine Builder Story</span></button>
+          <button class="tbtn" onclick="selTopic(this,`Bitcoin self-custody guide for beginners — hardware wallets`)"><span class="ti">🔐</span><span class="tl">Self-Custody</span></button>
+          <button class="tbtn" onclick="selTopic(this,`Fed policy and why Bitcoin is the only rational response`)"><span class="ti">🏦</span><span class="tl">Fed vs Bitcoin</span></button>
+          <button class="tbtn" onclick="selTopic(this,`Ethical hacking as a career path from maintenance worker`)"><span class="ti">👻</span><span class="tl">Hacking Career</span></button>
+        </div>
+        <input class="tinput" id="topic-custom" placeholder="Or type a custom topic...">
+        <div style="display:flex;gap:8px;">
+          <button class="abtn pk" onclick="genArticle()">⚡ GENERATE</button>
+          <button class="abtn sc" onclick="clearTopic()">✕ Clear</button>
+        </div>
+        <div class="sbox" id="gen-status">Pick a topic → Generate → run command on gaming rig</div>
+      </div>
+
+      <div class="panel c">
+        <div class="ptitle"><div class="dot c"></div>TheRuralDegen Quick Post</div>
+        <textarea class="trd-textarea" id="trd-text" placeholder="Write post or Auto-Generate..."></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button class="abtn pk" onclick="postTRD()">📤 POST NOW</button>
+          <button class="abtn sc" onclick="autoTRD()">🤖 Auto</button>
+          <button class="abtn sc" onclick="document.getElementById('trd-text').value=''">✕</button>
+        </div>
+        <div class="sbox" id="trd-status">Ready → @TheRuralDegen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASKS TAB -->
+  <div class="tab-pane" id="tab-checklist">
+    <div class="g2">
+      <div class="panel">
+        <div class="ptitle"><div class="dot"></div>🔴 Hot — Do First</div>
+        <div id="tasks-hot"></div>
+      </div>
+      <div class="panel g">
+        <div class="ptitle"><div class="dot g"></div>🟡 This Week + Queue</div>
+        <div id="tasks-rest"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:0">
+      <div class="ptitle"><div class="dot c"></div>Add Task</div>
+      <div style="display:flex;gap:8px;">
+        <input class="tinput" id="new-task" placeholder="New task..." style="margin:0;flex:1">
+        <select id="new-pri" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;padding:8px 12px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:0.8rem;outline:none;">
+          <option value="hot">🔴 Hot</option>
+          <option value="week">🟡 Week</option>
+          <option value="queue">🟢 Queue</option>
+        </select>
+        <button class="abtn pk" onclick="addTask()">+ ADD</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RPG TAB -->
+  <div class="tab-pane" id="tab-rpg">
+    <div class="g2">
+      <div class="panel p">
+        <div class="ptitle"><div class="dot" style="background:#8b00ff"></div>Jon Rich — Character Sheet</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+          <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#8b00ff,var(--pink));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 20px rgba(139,0,255,0.4);">🦞</div>
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:1.1rem;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">JON RICH</div>
+            <div style="font-size:0.7rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;">⚡ The Rural Degen · Builder · Stacker</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+          <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;">
+            <div style="font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--gold)" id="r-level">34</div>
+            <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;">Level</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;">
+            <div style="font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:#8b00ff" id="r-xp">0</div>
+            <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;">XP</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;">
+            <div style="font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--cyan)" id="r-streak">6</div>
+            <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;">Streak</div>
+          </div>
+          <div style="text-align:center;padding:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;">
+            <div style="font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--green)" id="r-done">0</div>
+            <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;">Done</div>
+          </div>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;"><span>XP TO NEXT LEVEL</span><span id="r-xpfrac">0/1000</span></div>
+        <div class="xp-bar"><div class="xp-fill" id="r-xpbar" style="width:0%"></div></div>
+        <div style="margin-top:14px;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:8px;">SKILL TREES — CLICK TO EARN XP</div>
+        <div class="skill-tree-mini">
+          <div class="snode ul" onclick="gainXP(50,'Google Cybersecurity Cert study')">📚<span style="flex:1;margin-left:8px;">Google Cybersecurity Cert</span><span class="snode-xp">+50 XP</span></div>
+          <div class="snode" onclick="gainXP(100,'Security+ study session')">🛡<span style="flex:1;margin-left:8px;">CompTIA Security+</span><span class="snode-xp">+100 XP</span></div>
+          <div class="snode" onclick="gainXP(75,'gh0st.lol practice session')">👻<span style="flex:1;margin-left:8px;">Ethical Hacking (gh0st)</span><span class="snode-xp">+75 XP</span></div>
+          <div class="snode ul" onclick="gainXP(100,'Shipped Maineiac Trader')">📈<span style="flex:1;margin-left:8px;">Shipped SaaS Product</span><span class="snode-xp">+100 XP</span></div>
+          <div class="snode" onclick="gainXP(200,'First paying customer')">💰<span style="flex:1;margin-left:8px;">First Revenue</span><span class="snode-xp">+200 XP</span></div>
+          <div class="snode ul" onclick="gainXP(200,'Bitcoin stacker — sold the top')">₿<span style="flex:1;margin-left:8px;">Bitcoin Stacker</span><span class="snode-xp">+200 XP</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ptitle"><div class="dot g"></div>Daily Quests</div>
+        <div id="quest-list" style="margin-bottom:12px;"></div>
+        <input class="tinput" id="new-quest" placeholder="Add a quest..." style="margin-bottom:8px;">
+        <button class="abtn pk" onclick="addQuest()" style="width:100%;">+ ADD QUEST</button>
+        <div style="margin-top:14px;">
+          <div class="ptitle" style="margin-bottom:8px;"><div class="dot"></div>XP Log</div>
+          <div id="xp-log" style="font-family:'Space Mono',monospace;font-size:0.68rem;display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">⚡ LEVEL UP!</div>
+
+<script>
+// ── TABS ──────────────────────────────────────────────────
+function tab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'chat' && document.querySelectorAll('.cmsg').length === 0) initChat();
+}
+
+// ── CLOCK + BTC ──────────────────────────────────────────
+function tick() {
+  const now = new Date();
+  document.getElementById('h-clock').textContent = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+}
+setInterval(tick,1000); tick();
+
 async function fetchBTC() {
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true');
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
     const d = await r.json();
-    const price = d.bitcoin.usd;
-    const change = d.bitcoin.usd_24h_change;
-    const fmt = '$' + price.toLocaleString('en-US', {maximumFractionDigits: 0});
+    const p = d.bitcoin.usd, c = d.bitcoin.usd_24h_change;
+    const fmt = '$'+p.toLocaleString('en-US',{maximumFractionDigits:0});
     document.getElementById('btc-price').textContent = fmt;
-    document.getElementById('btc-header').textContent = fmt;
-    const changeEl = document.getElementById('btc-change');
-    const arrow = change >= 0 ? '▲' : '▼';
-    changeEl.textContent = `${arrow} ${Math.abs(change).toFixed(2)}% (24h)`;
-    changeEl.className = 'btc-change ' + (change >= 0 ? 'up' : 'down');
-    generateBars(change);
-  } catch(e) {
-    document.getElementById('btc-price').textContent = '$--,---';
+    document.getElementById('h-btc').textContent = fmt;
+    const cel = document.getElementById('btc-change');
+    cel.textContent = (c>=0?'▲':'▼')+Math.abs(c).toFixed(2)+'% 24h';
+    cel.className = 'btc-change '+(c>=0?'up':'dn');
+    genSpark(c);
+  } catch(e){}
+}
+
+function genSpark(c) {
+  const el = document.getElementById('spark'); el.innerHTML='';
+  for(let i=0;i<18;i++){
+    const b=document.createElement('div'); b.className='bar';
+    b.style.height=(Math.random()*0.7+0.2)*100+'%';
+    if(c>=0) b.style.background='var(--green)';
+    el.appendChild(b);
   }
 }
+fetchBTC(); setInterval(fetchBTC,60000);
 
-function generateBars(change) {
-  const chart = document.getElementById('mini-chart');
-  chart.innerHTML = '';
-  const heights = Array.from({length: 20}, () => Math.random() * 0.6 + 0.2);
-  const trend = change >= 0 ? 1 : -1;
-  heights.forEach((h, i) => {
-    const bar = document.createElement('div');
-    bar.className = 'bar' + (i === 19 ? ' active' : '');
-    bar.style.height = (h * 100) + '%';
-    if (change >= 0) bar.style.background = '#00ff87';
-    chart.appendChild(bar);
-  });
+// ── CHAT ─────────────────────────────────────────────────
+const SYS=`You are Molly — Jon Rich's AI. Brilliant, warm, sassy. Know all his projects: Maineiac Trader, StackerZero, gh0st.lol, CyberDice, Maine-iac Munchies, Maineiac Mystic, TheRuralDegen. Jon: Orono Maine, 6yr sober, maintenance worker, studying Google Cybersecurity Cert. Keep replies under 150 words unless asked. Occasional emoji ok.`;
+let hist=[{role:'system',content:SYS}];
+
+function initChat() {
+  addCmsg('m','Hey Jon 💋 I\'m loaded and ready. What do you need?');
 }
 
-fetchBTC();
-setInterval(fetchBTC, 60000);
-
-// ── CHAT ──────────────────────────────────────────────────
-const OLLAMA_URL = 'http://localhost:11434/api/chat';
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-
-const SYSTEM = `You are Molly — Jon's AI assistant. Brilliant, warm, a bit sassy. You're running in MOLLY//CORE, Jon's personal command center. Keep responses concise but helpful. You know all of Jon's projects: Maineiac Trader, StackerZero, gh0st.lol, CyberDice, Maine-iac Munchies, Maineiac Mystic, TheRuralDegen. You care about Bitcoin, privacy tech, and helping Jon build his empire while saving money on AI costs.`;
-
-let chatHistory = [{role:'system', content:SYSTEM}];
-let lastResponse = '';
-
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  
-  input.value = '';
-  addMessage('user', msg);
-  chatHistory.push({role:'user', content:msg});
-  
-  // Show thinking
-  const thinkId = addThinking();
-  
+async function csend() {
+  const inp=document.getElementById('cinput');
+  const txt=inp.value.trim(); if(!txt) return;
+  inp.value=''; addCmsg('u',txt); hist.push({role:'user',content:txt});
+  const t=addThink();
   try {
-    // Try Ollama first (local, free)
-    let reply = await tryOllama(msg);
-    removeThinking(thinkId);
-    addMessage('molly', reply);
-    chatHistory.push({role:'assistant', content:reply});
-    lastResponse = reply;
-    document.getElementById('last-response').textContent = reply.substring(0, 120) + (reply.length > 120 ? '...' : '');
-  } catch(e) {
-    removeThinking(thinkId);
-    addMessage('molly', "I can't reach the local Ollama server right now. Make sure Ollama is running on this machine! 💋");
-  }
+    const r=await fetch('http://localhost:11434/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'llama3.1:8b',messages:hist,stream:false})});
+    remEl(t);
+    if(r.ok){const d=await r.json();const rep=d.message.content;hist.push({role:'assistant',content:rep});addCmsg('m',rep);}
+    else throw new Error();
+  } catch(e){remEl(t);addCmsg('m','Ollama needs to be running on this machine for local AI. Run: ollama serve 💋');}
 }
 
-async function tryOllama(msg) {
-  const r = await fetch(OLLAMA_URL, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      model: 'llama3.1:8b',
-      messages: chatHistory,
-      stream: false
-    })
+function qsend(t){document.getElementById('cinput').value=t;csend();}
+
+function addCmsg(role,text) {
+  const c=document.getElementById('chat-msgs');
+  const d=document.createElement('div'); d.className='cmsg '+role;
+  d.innerHTML=`<div class="cav ${role}">${role==='m'?'💋':'🦞'}</div><div class="cbubble">${text}</div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight; return d;
+}
+
+function addThink(){
+  const c=document.getElementById('chat-msgs');
+  const d=document.createElement('div'); d.className='cmsg m';
+  d.innerHTML=`<div class="cav m">💋</div><div class="cbubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight; return d;
+}
+
+function remEl(el){if(el&&el.parentNode)el.parentNode.removeChild(el);}
+
+document.getElementById('cinput').addEventListener('keydown',e=>{if(e.key==='Enter')csend();});
+
+// ── PUBLISH ──────────────────────────────────────────────
+let selTop='';
+function selTopic(btn,t){document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selTop=t;document.getElementById('topic-custom').value='';}
+function clearTopic(){document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));selTop='';document.getElementById('topic-custom').value='';}
+
+function genArticle(){
+  const custom=document.getElementById('topic-custom').value.trim();
+  const topic=custom||selTop;
+  if(!topic){setStat('gen-status','err','Pick a topic first!');return;}
+  setStat('gen-status','inf',`Run on gaming rig:\n\npython C:\\Bots-69\\rig_agent.py --task article --topic "${topic.substring(0,80)}"\n\nDraft → C:\\Bots-69\\drafts\\ + Telegram preview`);
+}
+
+async function postTRD(){
+  const text=document.getElementById('trd-text').value.trim();
+  if(!text){setStat('trd-status','err','Write something first!');return;}
+  setStat('trd-status','inf','Posting...');
+  try{
+    const r=await fetch(`https://api.telegram.org/bot8424830406:AAFGdCOs1yVqJick7QfSup7j9PMIMHs7uTU/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:'-1003783111309',text})});
+    const d=await r.json();
+    if(d.ok){setStat('trd-status','ok','✅ Posted to @TheRuralDegen!');document.getElementById('trd-text').value='';}
+    else setStat('trd-status','err','❌ '+d.description);
+  }catch(e){setStat('trd-status','err','❌ Network error');}
+}
+
+async function autoTRD(){
+  setStat('trd-status','inf','Fetching BTC price...');
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const d=await r.json(); const p=d.bitcoin.usd.toLocaleString(); const c=d.bitcoin.usd_24h_change.toFixed(2);
+    const arrow=c>=0?'▲':'▼';
+    const posts=[
+      `🟠 BTC: $${p} ${arrow}${Math.abs(c)}%\n\nThe network doesn't care about your feelings. 144 blocks today.\n\nStack accordingly.\n\n— TheRuralDegen 🦞\nmaineiactrader.com`,
+      `₿ $${p} right now.\n\n${c>=0?'Green candles. Degens rejoice.':'Red candles. Degens buy more.'}\n\nBuilding from Maine.\nmaineiactrader.com\n\n— TheRuralDegen 🦞`,
+    ];
+    document.getElementById('trd-text').value=posts[Math.floor(Math.random()*posts.length)];
+    setStat('trd-status','inf','Generated — edit if needed, then POST NOW');
+  }catch(e){setStat('trd-status','err','Could not fetch BTC price');}
+}
+
+function setStat(id,type,msg){const el=document.getElementById(id);el.innerHTML=`<span class="${type}">${msg}</span>`;}
+
+// ── TASKS ────────────────────────────────────────────────
+const DEFAULT_TASKS=[
+  {id:1,name:'Set up Stripe $3.99 link for Maineiac Mystic',priority:'hot',done:false},
+  {id:2,name:'Fix maineiactrader.com DNS (delete www A record)',priority:'hot',done:false},
+  {id:3,name:'Post Maineiac Trader launch on SN + X',priority:'hot',done:false},
+  {id:4,name:'Deploy gh0st.lol to Vercel',priority:'hot',done:false},
+  {id:5,name:'Send Co-Creator proposal to @Aspects_And_Alchemy',priority:'hot',done:false},
+  {id:6,name:'Regenerate X API Access Token for @TheRuralDegen',priority:'week',done:false},
+  {id:7,name:'Stripe bank verification → get whsec_',priority:'week',done:false},
+  {id:8,name:'Set up Kali WSL2 on Legion Go S',priority:'week',done:false},
+  {id:9,name:'Finish Syncthing folder sharing',priority:'week',done:false},
+  {id:10,name:'Check Pi 4 node sync + storage',priority:'week',done:false},
+  {id:11,name:'CyberDice mainnet (~$200 SOL)',priority:'queue',done:false},
+  {id:12,name:'Read BIP-360 draft + engage authors',priority:'queue',done:false},
+  {id:13,name:'Jameson Lopp Bitcoin Security Model — read',priority:'queue',done:false},
+];
+let tasks=JSON.parse(localStorage.getItem('mc-tasks')||'null')||DEFAULT_TASKS;
+function saveTasks(){localStorage.setItem('mc-tasks',JSON.stringify(tasks));}
+
+function renderTasks(){
+  const hot=document.getElementById('tasks-hot'); hot.innerHTML='';
+  const rest=document.getElementById('tasks-rest'); rest.innerHTML='';
+  tasks.sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return['hot','week','queue'].indexOf(a.priority)-['hot','week','queue'].indexOf(b.priority);})
+  .forEach(t=>{
+    const pc=t.priority==='hot'?'ph':t.priority==='week'?'pw':'pq';
+    const pl=t.priority==='hot'?'🔴 Hot':t.priority==='week'?'🟡 Week':'🟢 Queue';
+    const d=document.createElement('div'); d.className='cl-item'+(t.done?' done':'');
+    d.innerHTML=`<div class="cl-circle">${t.done?'✓':''}</div><div class="cl-name">${t.name}</div><span class="cl-p ${pc}">${pl}</span>`;
+    d.onclick=()=>{const task=tasks.find(x=>x.id===t.id);if(task){task.done=!task.done;saveTasks();renderTasks();}};
+    (t.priority==='hot'?hot:rest).appendChild(d);
   });
-  if (!r.ok) throw new Error('Ollama failed');
-  const d = await r.json();
-  return d.message.content;
 }
 
-function addMessage(role, content) {
-  const area = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = `message ${role}`;
-  div.innerHTML = `
-    <div class="msg-avatar ${role === 'molly' ? 'molly' : 'jon'}">${role === 'molly' ? '💋' : '🦞'}</div>
-    <div class="msg-bubble">${content}</div>
-  `;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-  return div;
+function addTask(){
+  const n=document.getElementById('new-task').value.trim(); if(!n) return;
+  tasks.push({id:Date.now(),name:n,priority:document.getElementById('new-pri').value,done:false});
+  document.getElementById('new-task').value=''; saveTasks(); renderTasks();
+}
+document.getElementById('new-task').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+renderTasks();
+
+// ── RPG ──────────────────────────────────────────────────
+const XPL=1000;
+let rpg=JSON.parse(localStorage.getItem('mc-rpg')||'null')||{xp:3400,quests:[
+  {id:1,name:'Study cybersecurity cert (30 min)',xp:50,done:false},
+  {id:2,name:'Push code to GitHub',xp:40,done:false},
+  {id:3,name:'Post to StackerZero or SN',xp:35,done:false},
+  {id:4,name:'Check Maineiac Trader metrics',xp:25,done:false},
+  {id:5,name:'Walk or exercise',xp:30,done:false},
+]};
+
+function saveRPG(){localStorage.setItem('mc-rpg',JSON.stringify(rpg));}
+
+function renderRPG(){
+  const level=Math.floor(rpg.xp/XPL);
+  const lxp=rpg.xp%XPL;
+  document.getElementById('r-level').textContent=level;
+  document.getElementById('r-xp').textContent=rpg.xp.toLocaleString();
+  document.getElementById('r-xpbar').style.width=(lxp/XPL*100).toFixed(1)+'%';
+  document.getElementById('r-xpfrac').textContent=lxp+'/'+XPL;
+  const done=rpg.quests.filter(q=>q.done).length;
+  document.getElementById('r-done').textContent=done;
+  renderQuests();
 }
 
-function addThinking() {
-  const area = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = 'message molly';
-  div.id = 'thinking-' + Date.now();
-  div.innerHTML = `
-    <div class="msg-avatar molly">💋</div>
-    <div class="msg-bubble"><div class="thinking"><span></span><span></span><span></span></div></div>
-  `;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-  return div.id;
+function renderQuests(){
+  const el=document.getElementById('quest-list'); el.innerHTML='';
+  rpg.quests.forEach(q=>{
+    const d=document.createElement('div'); d.className='cl-item'+(q.done?' done':'');
+    d.style.marginBottom='6px';
+    d.innerHTML=`<div class="cl-circle">${q.done?'✓':''}</div><div class="cl-name">${q.name}</div><span style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--gold);">+${q.xp}</span>`;
+    d.onclick=()=>{if(!q.done){q.done=true;gainXP(q.xp,q.name);} };
+    el.appendChild(d);
+  });
 }
 
-function removeThinking(id) {
-  const el = document.getElementById(id);
-  if (el) el.remove();
+function gainXP(amount,reason){
+  const prev=Math.floor(rpg.xp/XPL);
+  rpg.xp+=amount;
+  const next=Math.floor(rpg.xp/XPL);
+  const log=document.getElementById('xp-log');
+  const e=document.createElement('div');
+  e.style.display='flex'; e.style.justifyContent='space-between';
+  e.innerHTML=`<span style="color:var(--muted)">${reason.substring(0,35)}</span><span style="color:var(--gold)">+${amount}</span>`;
+  log.insertBefore(e,log.firstChild);
+  if(next>prev){const t=document.getElementById('toast');t.textContent='⚡ LEVEL '+next+'!';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+  saveRPG(); renderRPG();
 }
 
-// Enter key to send
-document.getElementById('chat-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') sendMessage();
-});
-
-// ── QUICK ACTIONS ─────────────────────────────────────────
-const quickPrompts = {
-  stackerzero: "Give me a punchy StackerZero article idea for today. Bitcoin angle, personal story hook.",
-  trd: "Write a TheRuralDegen Telegram post with Maine degen energy. Use current BTC at $73K.",
-  btc: "Give me a sharp 3-sentence Bitcoin market analysis right now.",
-  tiktok: "Give Josi 3 TikTok video ideas for Maine-iac Munchies tumblers this week.",
-  opsec: "Run a quick OPSEC check — what should Jon be careful about this week?",
-  ideas: "Give Jon 3 revenue ideas he could start this week with zero upfront cost."
-};
-
-function quickAction(key) {
-  document.getElementById('chat-input').value = quickPrompts[key];
-  sendMessage();
+function addQuest(){
+  const n=document.getElementById('new-quest').value.trim(); if(!n) return;
+  rpg.quests.push({id:Date.now(),name:n,xp:30,done:false});
+  document.getElementById('new-quest').value=''; saveRPG(); renderRPG();
 }
+document.getElementById('new-quest').addEventListener('keydown',e=>{if(e.key==='Enter')addQuest();});
 
-// ── RATING ────────────────────────────────────────────────
-const ratings = JSON.parse(localStorage.getItem('molly-ratings') || '[]');
+// Reset quests daily
+const today=new Date().toDateString();
+if(localStorage.getItem('mc-day')!==today){rpg.quests.forEach(q=>q.done=false);localStorage.setItem('mc-day',today);saveRPG();}
 
-function rate(score) {
-  const emojis = {5:'🔥 Perfect', 4:'✅ Good', 3:'😐 OK', 2:'👎 Meh', 1:'❌ Wrong'};
-  ratings.push({score, time: new Date().toISOString(), response: lastResponse.substring(0,80)});
-  localStorage.setItem('molly-ratings', JSON.stringify(ratings.slice(-50)));
-  
-  const log = document.getElementById('rating-log');
-  const avg = (ratings.reduce((s,r) => s+r.score, 0) / ratings.length).toFixed(1);
-  log.innerHTML = `Last: ${emojis[score]} · Avg score: ${avg}/5 · Total ratings: ${ratings.length}`;
-}
-
-// Load existing ratings
-if (ratings.length > 0) {
-  const avg = (ratings.reduce((s,r) => s+r.score, 0) / ratings.length).toFixed(1);
-  document.getElementById('rating-log').innerHTML = `Avg score: ${avg}/5 · Total ratings: ${ratings.length}`;
-}
+renderRPG();
 </script>
 </body>
 </html>
