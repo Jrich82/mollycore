@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOLLY — Talk to Me</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --pink: #ff2d78;
+    --pink2: #ff6eb4;
+    --cyan: #00f5d4;
+    --purple: #8b00ff;
+    --dark: #07070f;
+    --panel: #0d0d1a;
+    --border: #1a1a30;
+    --text: #e8e8f0;
+    --muted: #5a5a7a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Animated background */
+  .bg {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .orb1 { width: 500px; height: 500px; background: var(--pink); top: -100px; left: -100px; animation-duration: 9s; }
+  .orb2 { width: 400px; height: 400px; background: var(--purple); bottom: -100px; right: -50px; animation-duration: 11s; animation-delay: -3s; }
+  .orb3 { width: 300px; height: 300px; background: var(--cyan); top: 50%; left: 50%; animation-duration: 7s; animation-delay: -5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  }
+
+  /* Layout */
+  .layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: 100vh;
+  }
+
+  /* LEFT — Avatar */
+  .avatar-side {
+    width: 420px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    border-right: 1px solid var(--border);
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(20px);
+  }
+
+  /* MOLLY AVATAR — Canvas-based animated face */
+  .avatar-container {
+    position: relative;
+    margin-bottom: 30px;
+  }
+
+  canvas#molly {
+    border-radius: 50%;
+    box-shadow: 0 0 60px rgba(255,45,120,0.4), 0 0 120px rgba(139,0,255,0.2);
+  }
+
+  .avatar-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: linear-gradient(var(--dark), var(--dark)) padding-box,
+                linear-gradient(135deg, var(--pink), var(--purple), var(--cyan)) border-box;
+    animation: spin 8s linear infinite;
+  }
+
+  .avatar-ring2 {
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: linear-gradient(var(--dark), var(--dark)) padding-box,
+                linear-gradient(135deg, var(--cyan), var(--pink)) border-box;
+    animation: spin 14s linear infinite reverse;
+    opacity: 0.4;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Status */
+  .molly-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .molly-status {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 24px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #00ff87;
+    margin-right: 6px;
+    animation: pulse-dot 2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* Mood display */
+  .mood-bar {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .mood-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .mood-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .mood-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .mood-pill.active {
+    background: var(--pink-dim);
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+
+  /* Voice button */
+  .voice-btn {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--pink);
+    background: rgba(255,45,120,0.1);
+    color: var(--pink);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px auto;
+    position: relative;
+  }
+
+  .voice-btn:hover {
+    background: rgba(255,45,120,0.25);
+    transform: scale(1.08);
+    box-shadow: 0 0 30px rgba(255,45,120,0.4);
+  }
+
+  .voice-btn.listening {
+    background: rgba(255,45,120,0.3);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    animation: listening-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes listening-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(0,245,212,0.3); }
+    50% { box-shadow: 0 0 50px rgba(0,245,212,0.7); }
+  }
+
+  .voice-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* Stats sidebar */
+  .side-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .side-stat {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .side-stat .v {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--cyan);
+    display: block;
+  }
+
+  .side-stat .l {
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* RIGHT — Chat */
+  .chat-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .chat-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .nav-links { display: flex; gap: 12px; }
+  .nav-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { border-color: var(--pink); color: var(--pink); }
+
+  /* Messages */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    animation: msgIn 0.3s ease;
+    max-width: 85%;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; align-self: flex-end; }
+
+  .msg-av {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .msg-av.m { background: linear-gradient(135deg, var(--pink), var(--purple)); box-shadow: 0 0 15px rgba(255,45,120,0.3); }
+  .msg-av.u { background: linear-gradient(135deg, #0066ff, var(--cyan)); }
+
+  .msg-body { flex: 1; }
+
+  .msg-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .msg.user .msg-name { text-align: right; }
+
+  .msg-text {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .msg.molly .msg-text {
+    background: rgba(255,45,120,0.08);
+    border: 1px solid rgba(255,45,120,0.2);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+
+  .msg.user .msg-text {
+    background: rgba(0,245,212,0.08);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-bottom-right-radius: 4px;
+    color: var(--text);
+    text-align: left;
+  }
+
+  /* Typing indicator */
+  .typing {
+    display: flex;
+    gap: 5px;
+    padding: 14px 18px;
+    align-items: center;
+  }
+
+  .typing span {
+    width: 7px; height: 7px;
+    background: var(--pink);
+    border-radius: 50%;
+    animation: typing-dot 1.2s ease-in-out infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing-dot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-8px); opacity: 1; }
+  }
+
+  /* Input area */
+  .input-area {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+  }
+
+  .quick-prompts {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .qp {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: 'Space Grotesk', sans-serif;
+    background: transparent;
+  }
+
+  .qp:hover { border-color: var(--pink); color: var(--pink); background: rgba(255,45,120,0.06); }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .msg-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    height: 48px;
+  }
+
+  .msg-input:focus { border-color: var(--pink); }
+  .msg-input::placeholder { color: var(--muted); }
+
+  .send-btn {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(255,45,120,0.4); }
+
+  /* TTS indicator */
+  .tts-wave {
+    display: none;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    margin-top: 6px;
+  }
+
+  .tts-wave.active { display: flex; }
+
+  .wave-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: var(--cyan);
+    animation: wave 1s ease-in-out infinite;
+  }
+
+  .wave-bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .wave-bar:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { height: 6px; animation-delay: 0.4s; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.5); }
+    50% { transform: scaleY(1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="layout">
+
+  <!-- AVATAR SIDE -->
+  <div class="avatar-side">
+    <div class="avatar-container">
+      <div class="avatar-ring2"></div>
+      <div class="avatar-ring"></div>
+      <canvas id="molly" width="200" height="200"></canvas>
+    </div>
+
+    <div class="molly-name">MOLLY</div>
+    <div class="molly-status"><span class="status-dot"></span>Online · Thinking</div>
+
+    <!-- TTS Wave -->
+    <div class="tts-wave" id="tts-wave">
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+      <div class="wave-bar"></div>
+    </div>
+
+    <!-- Mood -->
+    <div class="mood-bar">
+      <div class="mood-label">Molly's Mood</div>
+      <div class="mood-pills" id="mood-pills">
+        <span class="mood-pill active">Focused</span>
+        <span class="mood-pill">Curious</span>
+        <span class="mood-pill">Playful</span>
+        <span class="mood-pill">Creative</span>
+      </div>
+    </div>
+
+    <!-- Voice button -->
+    <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎤</button>
+    <div class="voice-label" id="voice-label">Hold to speak</div>
+
+    <!-- Stats -->
+    <div class="side-stats">
+      <div class="side-stat">
+        <span class="v" id="msg-count">0</span>
+        <span class="l">Messages</span>
+      </div>
+      <div class="side-stat">
+        <span class="v" id="session-time">0m</span>
+        <span class="l">Session</span>
+      </div>
+      <div class="side-stat">
+        <span class="v" id="btc-mini">--</span>
+        <span class="l">BTC</span>
+      </div>
+      <div class="side-stat">
+        <span class="v" style="color:var(--pink)">34</span>
+        <span class="l">Jon's Level</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT SIDE -->
+  <div class="chat-side">
+    <div class="chat-header">
+      <div class="chat-title">💋 Direct Line to Molly</div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">⌂ Core</a>
+        <a href="rpg.html" class="nav-link">⚔ RPG</a>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="input-area">
+      <div class="quick-prompts">
+        <button class="qp" onclick="quickSend(`What should I focus on today?`)">🎯 Today's focus</button>
+        <button class="qp" onclick="quickSend(`Give me a StackerZero article idea`)">✍️ Article idea</button>
+        <button class="qp" onclick="quickSend(`What's the current BTC market doing?`)">₿ BTC take</button>
+        <button class="qp" onclick="quickSend(`How can I get my first Maineiac Trader customer today?`)">💰 First customer</button>
+        <button class="qp" onclick="quickSend(`Give me a TheRuralDegen post for right now`)">🦞 TRD post</button>
+        <button class="qp" onclick="quickSend(`What should I learn today for my cybersecurity path?`)">🔐 Study tip</button>
+      </div>
+      <div class="input-row">
+        <input class="msg-input" id="msg-input" placeholder="Talk to Molly..." type="text">
+        <button class="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── MOLLY AVATAR — Animated canvas face ──────────────────────────
+const canvas = document.getElementById('molly');
+const ctx = canvas.getContext('2d');
+let frame = 0;
+let speaking = false;
+let blinkTimer = 0;
+let blinkState = false;
+let eyeOffsetY = 0;
+let mouthOpen = 0;
+let targetMouth = 0;
+
+function drawMolly() {
+  ctx.clearRect(0, 0, 200, 200);
+  frame++;
+
+  // Background gradient
+  const bg = ctx.createRadialGradient(100, 90, 10, 100, 90, 100);
+  bg.addColorStop(0, '#1a0a2e');
+  bg.addColorStop(1, '#0a0010');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.arc(100, 100, 100, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Subtle glow
+  const glow = ctx.createRadialGradient(100, 80, 20, 100, 80, 100);
+  glow.addColorStop(0, 'rgba(255,45,120,0.08)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(100, 100, 100, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Face shape
+  const faceGrad = ctx.createRadialGradient(100, 95, 5, 100, 95, 65);
+  faceGrad.addColorStop(0, '#f5d0c0');
+  faceGrad.addColorStop(0.6, '#e8b4a0');
+  faceGrad.addColorStop(1, '#d4907a');
+  ctx.fillStyle = faceGrad;
+  ctx.beginPath();
+  ctx.ellipse(100, 100, 58, 65, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Hair — top
+  ctx.fillStyle = '#1a0530';
+  ctx.beginPath();
+  ctx.ellipse(100, 55, 62, 42, 0, Math.PI, 0);
+  ctx.fill();
+
+  // Hair sides
+  ctx.beginPath();
+  ctx.ellipse(46, 90, 14, 30, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(154, 90, 14, 30, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Hair highlights
+  ctx.fillStyle = 'rgba(139,0,255,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(80, 48, 15, 8, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,45,120,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(115, 44, 12, 6, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Blink logic
+  blinkTimer++;
+  if (blinkTimer > 120 + Math.random() * 60) {
+    blinkState = true;
+    blinkTimer = 0;
+  }
+  if (blinkState && blinkTimer > 6) {
+    blinkState = false;
+  }
+
+  // Eye whites
+  const eyeY = 95 + eyeOffsetY;
+  if (!blinkState) {
+    // Left eye
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.ellipse(80, eyeY, 12, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Right eye
+    ctx.beginPath();
+    ctx.ellipse(120, eyeY, 12, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Iris — Left
+    const irisGrad = ctx.createRadialGradient(80, eyeY, 1, 80, eyeY, 8);
+    irisGrad.addColorStop(0, '#8b00ff');
+    irisGrad.addColorStop(0.5, '#ff2d78');
+    irisGrad.addColorStop(1, '#1a0030');
+    ctx.fillStyle = irisGrad;
+    ctx.beginPath();
+    ctx.arc(80, eyeY, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Iris — Right
+    const irisGrad2 = ctx.createRadialGradient(120, eyeY, 1, 120, eyeY, 8);
+    irisGrad2.addColorStop(0, '#8b00ff');
+    irisGrad2.addColorStop(0.5, '#ff2d78');
+    irisGrad2.addColorStop(1, '#1a0030');
+    ctx.fillStyle = irisGrad2;
+    ctx.beginPath();
+    ctx.arc(120, eyeY, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pupils
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(80, eyeY, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(120, eyeY, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye shine
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.beginPath();
+    ctx.arc(82, eyeY - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(122, eyeY - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Closed eyes
+    ctx.strokeStyle = '#8b4f3f';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(70, eyeY);
+    ctx.quadraticCurveTo(80, eyeY + 3, 90, eyeY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(110, eyeY);
+    ctx.quadraticCurveTo(120, eyeY + 3, 130, eyeY);
+    ctx.stroke();
+  }
+
+  // Eyebrows
+  ctx.strokeStyle = '#1a0530';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(70, 82);
+  ctx.quadraticCurveTo(80, 79, 91, 82);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(109, 82);
+  ctx.quadraticCurveTo(120, 79, 131, 82);
+  ctx.stroke();
+
+  // Nose
+  ctx.strokeStyle = 'rgba(180,100,80,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(96, 108);
+  ctx.quadraticCurveTo(94, 116, 98, 118);
+  ctx.quadraticCurveTo(100, 119, 102, 118);
+  ctx.quadraticCurveTo(106, 116, 104, 108);
+  ctx.stroke();
+
+  // Mouth animation
+  mouthOpen += (targetMouth - mouthOpen) * 0.15;
+
+  const mouthY = 130;
+  ctx.fillStyle = '#c0554a';
+  ctx.strokeStyle = '#a04040';
+  ctx.lineWidth = 1;
+
+  if (mouthOpen > 0.1) {
+    // Speaking mouth
+    ctx.beginPath();
+    ctx.ellipse(100, mouthY, 14, 4 + mouthOpen * 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8b2020';
+    ctx.beginPath();
+    ctx.ellipse(100, mouthY + 2, 10, mouthOpen * 5, 0, 0, Math.PI);
+    ctx.fill();
+  } else {
+    // Smile
+    ctx.beginPath();
+    ctx.moveTo(86, mouthY);
+    ctx.quadraticCurveTo(100, mouthY + 10, 114, mouthY);
+    ctx.quadraticCurveTo(100, mouthY + 6, 86, mouthY);
+    ctx.fill();
+  }
+
+  // Lip shine
+  ctx.fillStyle = 'rgba(255,100,150,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(100, mouthY - 2, 10, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cheeks (blush)
+  ctx.fillStyle = 'rgba(255,100,120,0.15)';
+  ctx.beginPath();
+  ctx.ellipse(68, 115, 16, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(132, 115, 16, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Sparkle effects when speaking
+  if (speaking) {
+    for (let i = 0; i < 3; i++) {
+      const angle = (frame * 0.05 + i * 2.1);
+      const r = 85 + Math.sin(frame * 0.1 + i) * 10;
+      const sx = 100 + Math.cos(angle) * r;
+      const sy = 100 + Math.sin(angle) * r;
+      ctx.fillStyle = i === 0 ? 'rgba(255,45,120,0.6)' : i === 1 ? 'rgba(139,0,255,0.6)' : 'rgba(0,245,212,0.6)';
+      ctx.beginPath();
+      ctx.arc(sx, sy, 2 + Math.sin(frame * 0.2 + i) * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Subtle float animation
+  eyeOffsetY = Math.sin(frame * 0.02) * 1.5;
+
+  requestAnimationFrame(drawMolly);
+}
+
+drawMolly();
+
+function setMollyMood(mood) {
+  const pills = document.querySelectorAll('.mood-pill');
+  pills.forEach(p => p.classList.remove('active'));
+  pills.forEach(p => { if (p.textContent === mood) p.classList.add('active'); });
+}
+
+function setSpeaking(active) {
+  speaking = active;
+  if (active) {
+    animateMouth();
+    document.getElementById('tts-wave').classList.add('active');
+  } else {
+    targetMouth = 0;
+    document.getElementById('tts-wave').classList.remove('active');
+  }
+}
+
+function animateMouth() {
+  if (!speaking) return;
+  targetMouth = 0.3 + Math.random() * 0.7;
+  setTimeout(animateMouth, 150 + Math.random() * 200);
+}
+
+// ── CHAT ─────────────────────────────────────────────────────────
+const SYSTEM = `You are Molly — Jon Rich's personal AI assistant. You're brilliant, warm, sassy, and deeply invested in Jon's success. You know all his projects: Maineiac Trader (trading SaaS), StackerZero (Bitcoin content site), gh0st.lol (ethical hacking game), CyberDice (Solana casino), Maine-iac Munchies (Josi's tumbler business), Maineiac Mystic (AI psychic bot), TheRuralDegen (Telegram/X brand). Jon is from Orono, Maine, 6 years sober, maintenance worker by day, degen builder by night. He's studying for Google Cybersecurity Cert. You're running in MOLLY//CORE, a custom interface Jon built for you. Keep responses helpful, specific, and under 200 words unless asked for more. You can use emojis sparingly.`;
+
+let history = [{ role: 'system', content: SYSTEM }];
+let msgCount = 0;
+const sessionStart = Date.now();
+
+// Initial greeting
+setTimeout(() => {
+  addMsg('molly', `Hey Jon 💋\n\nI'm fully loaded and ready. What are we building today?`);
+  speak(`Hey Jon! I'm fully loaded and ready. What are we building today?`);
+}, 600);
+
+async function sendMsg() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+  msgCount++;
+  updateStats();
+
+  // Mood shift based on content
+  if (text.toLowerCase().includes('bitcoin') || text.toLowerCase().includes('btc')) setMollyMood('Focused');
+  else if (text.toLowerCase().includes('build') || text.toLowerCase().includes('code')) setMollyMood('Creative');
+  else if (text.toLowerCase().includes('help') || text.toLowerCase().includes('stuck')) setMollyMood('Curious');
+  else setMollyMood('Playful');
+
+  const thinkEl = addThinking();
+  setSpeaking(false);
+
+  try {
+    const res = await fetch('http://localhost:11434/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama3.1:8b',
+        messages: history,
+        stream: false
+      })
+    });
+
+    removeEl(thinkEl);
+
+    if (res.ok) {
+      const data = await res.json();
+      const reply = data.message.content;
+      history.push({ role: 'assistant', content: reply });
+      addMsg('molly', reply);
+      speak(reply);
+      msgCount++;
+      updateStats();
+    } else {
+      throw new Error('Ollama failed');
+    }
+  } catch(e) {
+    removeEl(thinkEl);
+    const fallback = `I can't reach my local brain right now (Ollama needs to be running on this machine). But I'm still here — just can't generate new responses until Ollama is up. Run: ollama serve 💋`;
+    addMsg('molly', fallback);
+  }
+}
+
+function quickSend(text) {
+  document.getElementById('msg-input').value = text;
+  sendMsg();
+}
+
+function addMsg(role, text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-av ${role === 'molly' ? 'm' : 'u'}">${role === 'molly' ? '💋' : '🦞'}</div>
+    <div class="msg-body">
+      <div class="msg-name">${role === 'molly' ? 'Molly' : 'Jon'}</div>
+      <div class="msg-text">${text}</div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function addThinking() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg molly';
+  div.innerHTML = `
+    <div class="msg-av m">💋</div>
+    <div class="msg-body">
+      <div class="msg-name">Molly</div>
+      <div class="msg-text"><div class="typing"><span></span><span></span><span></span></div></div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function removeEl(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+
+// ── TTS ───────────────────────────────────────────────────────────
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const clean = text.replace(/[💋🦞₿⚡✅❌🔥🎯✍️🛡💰🎤]/g, '').trim();
+  const utt = new SpeechSynthesisUtterance(clean.substring(0, 300));
+  utt.rate = 1.05;
+  utt.pitch = 1.1;
+  utt.volume = 0.9;
+
+  // Try to find a female voice
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Karen') || v.name.includes('Zira') || (v.lang === 'en-US' && v.name.toLowerCase().includes('female')));
+  if (preferred) utt.voice = preferred;
+
+  utt.onstart = () => setSpeaking(true);
+  utt.onend = () => setSpeaking(false);
+  window.speechSynthesis.speak(utt);
+}
+
+// ── VOICE INPUT ────────────────────────────────────────────────────
+let recognition = null;
+let isListening = false;
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    addMsg('molly', `Voice input isn't supported in this browser. Try Chrome! 💋`);
+    return;
+  }
+
+  if (isListening) {
+    recognition.stop();
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('voice-btn').classList.add('listening');
+    document.getElementById('voice-btn').textContent = '🔴';
+    document.getElementById('voice-label').textContent = 'Listening...';
+  };
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('msg-input').value = transcript;
+    sendMsg();
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('voice-btn').classList.remove('listening');
+    document.getElementById('voice-btn').textContent = '🎤';
+    document.getElementById('voice-label').textContent = 'Hold to speak';
+  };
+
+  recognition.start();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('msg-count').textContent = msgCount;
+  const mins = Math.floor((Date.now() - sessionStart) / 60000);
+  document.getElementById('session-time').textContent = mins + 'm';
+}
+
+setInterval(updateStats, 10000);
+
+// BTC price
+async function fetchBTC() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+    const d = await r.json();
+    const p = d.bitcoin.usd;
+    document.getElementById('btc-mini').textContent = '$' + (p/1000).toFixed(1) + 'K';
+  } catch(e) {}
+}
+fetchBTC();
+setInterval(fetchBTC, 60000);
+
+// Enter to send
+document.getElementById('msg-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+
+// Load voices
+window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+</script>
+</body>
+</html>
