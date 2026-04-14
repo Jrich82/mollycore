@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jon's Empire — Status</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --pink:#ff2d78;--cyan:#00f5d4;--gold:#ffd60a;
+    --purple:#8b00ff;--green:#00ff87;--red:#ff4444;
+    --dark:#08080f;--panel:#0e0e1a;--border:#1a1a30;
+    --text:#e8e8f0;--muted:#6b6b8a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--dark);color:var(--text);font-family:'Space Grotesk',sans-serif;padding-bottom:40px;}
+
+  .header{background:linear-gradient(135deg,#0d0d1a,#130820);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center;}
+  .header h1{font-family:'Space Mono',monospace;font-size:1.3rem;color:var(--pink);margin-bottom:4px;}
+  .header p{font-size:0.78rem;color:var(--muted);}
+
+  .section{padding:16px 16px 0;}
+  .section-title{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* Project cards */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden;}
+  .card-bar{position:absolute;top:0;left:0;right:0;height:3px;}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .card-left{display:flex;align-items:center;gap:10px;}
+  .card-emoji{font-size:1.3rem;}
+  .card-name{font-weight:700;font-size:0.9rem;}
+  .card-sub{font-size:0.68rem;color:var(--muted);}
+  .badge{font-family:'Space Mono',monospace;font-size:0.58rem;padding:3px 9px;border-radius:10px;font-weight:700;letter-spacing:1px;white-space:nowrap;}
+  .b-live{background:rgba(0,255,135,0.12);color:var(--green);border:1px solid rgba(0,255,135,0.3);}
+  .b-almost{background:rgba(255,214,10,0.12);color:var(--gold);border:1px solid rgba(255,214,10,0.3);}
+  .b-wip{background:rgba(255,45,120,0.12);color:var(--pink);border:1px solid rgba(255,45,120,0.3);}
+  .b-paused{background:rgba(90,90,122,0.12);color:var(--muted);border:1px solid var(--border);}
+
+  /* Progress bar */
+  .progress-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .progress-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:3px;}
+  .progress-pct{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);min-width:30px;text-align:right;}
+
+  /* Next action */
+  .next-action{background:rgba(255,255,255,0.03);border-left:3px solid var(--pink);padding:7px 10px;border-radius:0 8px 8px 0;font-size:0.75rem;color:var(--text);}
+  .next-action .label{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--pink);margin-bottom:2px;}
+
+  /* Revenue potential */
+  .revenue{font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--gold);margin-top:6px;}
+
+  /* Big todo list */
+  .todo-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
+  .todo-item:active{transform:scale(0.98);}
+  .todo-item.done{opacity:0.4;}
+  .todo-item.done .todo-name{text-decoration:line-through;}
+  .todo-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px;}
+  .todo-item.done .todo-check{background:var(--green);border-color:var(--green);color:var(--dark);}
+  .todo-body{flex:1;}
+  .todo-name{font-size:0.82rem;font-weight:500;margin-bottom:2px;}
+  .todo-meta{font-size:0.65rem;color:var(--muted);}
+  .todo-pri{font-family:'Space Mono',monospace;font-size:0.58rem;padding:2px 7px;border-radius:8px;flex-shrink:0;margin-top:2px;}
+  .p-hot{background:rgba(255,45,120,0.12);color:var(--pink);border:1px solid rgba(255,45,120,0.3);}
+  .p-week{background:rgba(255,214,10,0.12);color:var(--gold);border:1px solid rgba(255,214,10,0.3);}
+  .p-queue{background:rgba(90,90,122,0.12);color:var(--muted);border:1px solid var(--border);}
+
+  /* Revenue tracker */
+  .rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .rev-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+  .rev-val{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700;display:block;margin-bottom:4px;}
+  .rev-label{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+  /* Machine status */
+  .machine{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+  .machine-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .m-on{background:var(--green);box-shadow:0 0 8px rgba(0,255,135,0.5);}
+  .m-off{background:var(--muted);}
+  .machine-name{font-weight:600;font-size:0.85rem;}
+  .machine-sub{font-size:0.68rem;color:var(--muted);}
+
+  .footer{text-align:center;padding:20px 16px 0;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>JON'S EMPIRE — STATUS BOARD</h1>
+  <p>Updated April 14, 2026 · Tap todos to check them off</p>
+</div>
+
+<!-- REVENUE POTENTIAL -->
+<div class="section">
+  <div class="section-title">💰 Revenue Potential (Monthly)</div>
+  <div class="rev-grid">
+    <div class="rev-card">
+      <span class="rev-val" style="color:var(--green)">$0</span>
+      <span class="rev-label">Current MRR</span>
+    </div>
+    <div class="rev-card">
+      <span class="rev-val" style="color:var(--gold)">$800+</span>
+      <span class="rev-label">Within Reach</span>
+    </div>
+    <div class="rev-card">
+      <span class="rev-val" style="color:var(--cyan)">$3,000+</span>
+      <span class="rev-label">3-Month Target</span>
+    </div>
+    <div class="rev-card">
+      <span class="rev-val" style="color:var(--pink)">$10K+</span>
+      <span class="rev-label">12-Month Vision</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="section">
+  <div class="section-title">🚀 Projects</div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--cyan),var(--purple))"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">📈</span><div><div class="card-name">Maineiac Trader</div><div class="card-sub">maineiactrader.com</div></div></div>
+      <span class="badge b-almost">DNS Fix</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:85%;background:linear-gradient(90deg,var(--cyan),var(--purple))"></div></div><div class="progress-pct">85%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>Fix DNS: delete www A record on Porkbun → maineiactrader.com goes live</div>
+    <div class="revenue">💰 $25/mo or $240/yr | Founding: $15/mo</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--gold),#ff8c00)"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">₿</span><div><div class="card-name">StackerZero</div><div class="card-sub">stackerzero.com</div></div></div>
+      <span class="badge b-live">Live</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:75%;background:linear-gradient(90deg,var(--gold),#ff8c00)"></div></div><div class="progress-pct">75%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>Post 2 articles to SN (nvk-response + mythos). Add Lightning tip button.</div>
+    <div class="revenue">💰 Tips + audience building → future sponsorships</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--purple),var(--pink))"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">🔮</span><div><div class="card-name">Maineiac Mystic</div><div class="card-sub">@MaineiacMysticbot</div></div></div>
+      <span class="badge b-almost">Needs Payment</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:80%;background:linear-gradient(90deg,var(--purple),var(--pink))"></div></div><div class="progress-pct">80%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>Create $3.99 Stripe link → update bot welcome → post on TikTok once</div>
+    <div class="revenue">💰 $3.99/reading — 10 readings/day = $1,197/mo</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">⚓</span><div><div class="card-name">Maineiac Mariner</div><div class="card-sub">Telegram Bot</div></div></div>
+      <span class="badge b-almost">Almost Done</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:90%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><div class="progress-pct">90%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>Kill all Python → restart api.py then bot.py → test all buttons</div>
+    <div class="revenue">💰 Free now → Pro tier $4.99/mo → Maine marine community</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--green),#00aa55)"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">👻</span><div><div class="card-name">gh0st.lol</div><div class="card-sub">Ethical hacking game</div></div></div>
+      <span class="badge b-wip">Deploy Now</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:70%;background:linear-gradient(90deg,var(--green),#00aa55)"></div></div><div class="progress-pct">70%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>vercel.com/new → import Jrich82/Gh0st.lol → add GROQ_API_KEY → deploy</div>
+    <div class="revenue">💰 $9/mo Pro · $29 one-time · $49 CEH pack</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--pink),var(--gold))"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">💕</span><div><div class="card-name">Josi Bot (@RollieJoJobot)</div><div class="card-sub">Maine-iac Munchies assistant</div></div></div>
+      <span class="badge b-wip">Deploy to Rig</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:60%;background:linear-gradient(90deg,var(--pink),var(--gold))"></div></div><div class="progress-pct">60%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>Copy josi_bot.py to C:\Bots-69\ → run on gaming rig → share t.me/RollieJoJobot with Josi</div>
+    <div class="revenue">💰 Saves Josi hours/week → reduces burnout → grows the business</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,#00aa55,var(--cyan))"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">🎮</span><div><div class="card-name">Legion Go S</div><div class="card-sub">Mobile hacking rig</div></div></div>
+      <span class="badge b-wip">Tonight!</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:20%;background:linear-gradient(90deg,#00aa55,var(--cyan))"></div></div><div class="progress-pct">20%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION (5 PM reminder set)</div>wsl --install -d kali-linux → install nmap/tools → ollama pull phi3:mini</div>
+    <div class="revenue">💰 Professional tool for bug bounties + CEH cert</div>
+  </div>
+
+  <div class="card">
+    <div class="card-bar" style="background:linear-gradient(90deg,var(--purple),var(--cyan))"></div>
+    <div class="card-header">
+      <div class="card-left"><span class="card-emoji">🎲</span><div><div class="card-name">CyberDice</div><div class="card-sub">cyberdice.io</div></div></div>
+      <span class="badge b-paused">Needs $200 SOL</span>
+    </div>
+    <div class="progress-row"><div class="progress-bar"><div class="progress-fill" style="width:65%;background:linear-gradient(90deg,var(--purple),var(--cyan))"></div></div><div class="progress-pct">65%</div></div>
+    <div class="next-action"><div class="label">NEXT ACTION</div>Get ~$200 SOL → deploy to mainnet. Parked until then.</div>
+    <div class="revenue">💰 House edge on 11 games → passive income</div>
+  </div>
+
+</div>
+
+<!-- MASTER TODO -->
+<div class="section" style="margin-top:4px;">
+  <div class="section-title">✅ Master Todo</div>
+  <div id="todos"></div>
+</div>
+
+<!-- MACHINES -->
+<div class="section" style="margin-top:4px;">
+  <div class="section-title">🖥️ Your Machines</div>
+  <div class="machine"><div class="machine-dot m-on"></div><div><div class="machine-name">JONZ-POWDER (Gaming Rig)</div><div class="machine-sub">i7-14700F · 32GB · Gemma 4 · Bots running</div></div></div>
+  <div class="machine"><div class="machine-dot m-on"></div><div><div class="machine-name">jonLaptop</div><div class="machine-sub">OpenClaw · Project repos · Morning briefing</div></div></div>
+  <div class="machine"><div class="machine-dot m-off"></div><div><div class="machine-name">Legion Go S</div><div class="machine-sub">Setup tonight → Kali + Ollama mobile rig</div></div></div>
+</div>
+
+<!-- COST -->
+<div class="section" style="margin-top:4px;">
+  <div class="section-title">💸 Daily Costs</div>
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;">
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.8rem;"><span>Gaming rig bots (3x TRD + Mystic + Mariner)</span><span style="font-family:'Space Mono',monospace;color:var(--green)">$0.00</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.8rem;"><span>Morning briefing (Groq)</span><span style="font-family:'Space Mono',monospace;color:var(--green)">~$0.001</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:0.8rem;"><span>Memory log (Groq)</span><span style="font-family:'Space Mono',monospace;color:var(--green)">~$0.001</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.8rem;"><span>Talking to Molly (Anthropic)</span><span style="font-family:'Space Mono',monospace;color:var(--gold)">~$2-5</span></div>
+    <div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:0.85rem;"><span>Use me wisely!</span><span style="font-family:'Space Mono',monospace;color:var(--pink)">Top up at console.anthropic.com</span></div>
+  </div>
+</div>
+
+<div class="footer">Jon's Empire · Built with Molly 💋 · April 2026</div>
+
+<script>
+const TODOS = [
+  {id:1, name:"Fix maineiactrader.com DNS — delete www A record on Porkbun", meta:"5 mins → site goes live", pri:"hot", done:false},
+  {id:2, name:"Create $3.99 Stripe link for Maineiac Mystic", meta:"stripe.com → Payment Links → $3.99", pri:"hot", done:false},
+  {id:3, name:"Deploy gh0st.lol to Vercel", meta:"vercel.com/new → Jrich82/Gh0st.lol → GROQ_API_KEY", pri:"hot", done:false},
+  {id:4, name:"Copy josi_bot.py to gaming rig C:\\Bots-69\\", meta:"Then run python3.13 josi_bot.py", pri:"hot", done:false},
+  {id:5, name:"Legion Go S — install Kali WSL2 + Ollama", meta:"Reminder set for 5 PM tonight", pri:"hot", done:false},
+  {id:6, name:"Post SN articles: nvk-response + mythos", meta:"stackerzero.com/briefings → copy URL → post to SN", pri:"hot", done:false},
+  {id:7, name:"Anthropic credits — top up at console.anthropic.com", meta:"Morning briefing failing at 6:30 AM", pri:"hot", done:false},
+  {id:8, name:"Maineiac Trader — post launch on SN + X", meta:"Just one post each — first customer is the goal", pri:"week", done:false},
+  {id:9, name:"Stripe bank verification → get whsec_ webhook secret", meta:"Needed for real payments on Maineiac Trader", pri:"week", done:false},
+  {id:10, name:"Send Co-Creator proposal to @Aspects_And_Alchemy (Mystic)", meta:"Sister + spiritual audience = perfect partnership", pri:"week", done:false},
+  {id:11, name:"Regenerate X API Access Token for @TheRuralDegen", meta:"developer.x.com → Your App → Keys → Regenerate", pri:"week", done:false},
+  {id:12, name:"Finish Syncthing — share Projects folder between machines", meta:"Gaming rig Syncthing → Share with jonLaptop", pri:"week", done:false},
+  {id:13, name:"Pi 4 node health check", meta:"Check sync %, storage, peer count", pri:"week", done:false},
+  {id:14, name:"CyberDice — save up ~$200 SOL for mainnet deploy", meta:"Parked until funded", pri:"queue", done:false},
+  {id:15, name:"Read BIP-360 draft + engage authors on X", meta:"StackerZero content angle", pri:"queue", done:false},
+  {id:16, name:"Giscus comments on StackerZero briefings", meta:"GitHub Discussions → giscus.app", pri:"queue", done:false},
+  {id:17, name:"Press pass pitch to Bitcoin Magazine (Bitcoin 2026 — April 27-29)", meta:"Vegas conference — StackerZero coverage", pri:"queue", done:false},
+];
+
+let todos = JSON.parse(localStorage.getItem('empire-todos') || 'null') || TODOS;
+
+function renderTodos() {
+  const el = document.getElementById('todos');
+  el.innerHTML = '';
+  const priOrder = ['hot','week','queue'];
+  const sorted = [...todos].sort((a,b) => {
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    return priOrder.indexOf(a.pri) - priOrder.indexOf(b.pri);
+  });
+  sorted.forEach(t => {
+    const pc = t.pri==='hot'?'p-hot':t.pri==='week'?'p-week':'p-queue';
+    const pl = t.pri==='hot'?'🔴 Hot':t.pri==='week'?'🟡 Week':'🟢 Queue';
+    const d = document.createElement('div');
+    d.className = 'todo-item' + (t.done?' done':'');
+    d.innerHTML = `
+      <div class="todo-check">${t.done?'✓':''}</div>
+      <div class="todo-body">
+        <div class="todo-name">${t.name}</div>
+        <div class="todo-meta">${t.meta}</div>
+      </div>
+      <span class="todo-pri ${pc}">${pl}</span>
+    `;
+    d.onclick = () => {
+      const task = todos.find(x=>x.id===t.id);
+      if(task){ task.done = !task.done; localStorage.setItem('empire-todos', JSON.stringify(todos)); renderTodos(); }
+    };
+    el.appendChild(d);
+  });
+}
+
+renderTodos();
+</script>
+</body>
+</html>
