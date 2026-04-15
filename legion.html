@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Legion Go Setup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+  :root{--pink:#ff2d78;--cyan:#00f5d4;--gold:#ffd60a;--green:#00ff87;--dark:#08080f;--panel:#0e0e1a;--border:#1a1a30;--text:#e8e8f0;--muted:#6b6b8a;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--dark);color:var(--text);font-family:'Space Grotesk',sans-serif;padding-bottom:40px;}
+  .header{background:linear-gradient(135deg,#0d0d1a,#0a1a0a);padding:24px 16px;border-bottom:1px solid var(--border);text-align:center;}
+  .header h1{font-family:'Space Mono',monospace;font-size:1.2rem;color:var(--green);margin-bottom:4px;}
+  .header p{font-size:0.75rem;color:var(--muted);}
+  .nav-back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-family:'Space Mono',monospace;font-size:0.7rem;margin:16px 16px 0;transition:color 0.2s;}
+  .nav-back:hover{color:var(--green);}
+  .section{padding:16px 16px 0;}
+  .step{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
+  .step-num{position:absolute;top:14px;right:14px;font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700;color:rgba(0,255,135,0.15);}
+  .step-title{font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--green);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;}
+  .step-desc{font-size:0.78rem;color:var(--muted);margin-bottom:10px;line-height:1.5;}
+  .cmd{background:#000;border:1px solid #1a3a1a;border-radius:8px;padding:10px 12px;font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--green);margin-bottom:8px;position:relative;overflow-x:auto;white-space:pre;}
+  .cmd-label{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
+  .copy-btn{position:absolute;top:6px;right:6px;background:rgba(0,255,135,0.1);border:1px solid rgba(0,255,135,0.3);border-radius:6px;padding:2px 8px;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--green);cursor:pointer;transition:all 0.2s;}
+  .copy-btn:active{background:rgba(0,255,135,0.3);}
+  .tip{background:rgba(255,214,10,0.05);border-left:3px solid var(--gold);padding:8px 10px;border-radius:0 8px 8px 0;font-size:0.75rem;color:var(--text);margin-bottom:8px;}
+  .tip strong{color:var(--gold);}
+  .tools-table{width:100%;border-collapse:collapse;font-size:0.75rem;}
+  .tools-table th{text-align:left;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--muted);text-transform:uppercase;padding:6px 0;border-bottom:1px solid var(--border);}
+  .tools-table td{padding:8px 0;border-bottom:1px solid rgba(26,26,48,0.5);}
+  .tools-table td:first-child{font-family:'Space Mono',monospace;color:var(--green);padding-right:12px;white-space:nowrap;}
+  .section-title{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+  .trouble-item{padding:10px 12px;background:var(--panel);border:1px solid var(--border);border-radius:9px;margin-bottom:8px;font-size:0.78rem;}
+  .trouble-item .prob{color:var(--pink);font-weight:600;margin-bottom:3px;}
+  .trouble-item .fix{color:var(--muted);}
+  .done-btn{width:100%;padding:12px;border-radius:10px;border:none;font-family:'Space Mono',monospace;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+  .done-btn.incomplete{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);}
+  .done-btn.complete{background:rgba(0,255,135,0.15);border:1px solid rgba(0,255,135,0.4);color:var(--green);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>👻 LEGION GO — HACKING RIG</h1>
+  <p>Step-by-step setup guide</p>
+</div>
+
+<a href="index.html" class="nav-back">← MOLLY//CORE</a>
+
+<div class="section" style="margin-top:16px;">
+
+  <!-- STEP 1 -->
+  <div class="step" id="s1">
+    <div class="step-num">01</div>
+    <div class="step-title">📦 Install Kali Linux</div>
+    <div class="step-desc">Open PowerShell as Administrator on the Legion Go:</div>
+    <div class="cmd-label">PowerShell (Admin)</div>
+    <div class="cmd" id="cmd1">wsl --install -d kali-linux<button class="copy-btn" onclick="copy('cmd1')">COPY</button></div>
+    <div class="tip"><strong>Then:</strong> Restart when Windows asks. Open Kali from Start Menu. Set a username + password — remember it!</div>
+    <button class="done-btn incomplete" id="btn1" onclick="markDone(1)">Mark Complete</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="s2">
+    <div class="step-num">02</div>
+    <div class="step-title">🔧 Install Hacking Tools</div>
+    <div class="step-desc">In the Kali terminal, paste this entire command:</div>
+    <div class="cmd-label">Kali Terminal</div>
+    <div class="cmd" id="cmd2">sudo apt update && sudo apt install -y nmap nikto gobuster sqlmap hydra curl python3 git wget netcat-openbsd whois dnsutils<button class="copy-btn" onclick="copy('cmd2')">COPY</button></div>
+    <div class="tip"><strong>Takes 3-5 mins.</strong> Type password when asked — characters are hidden, that's normal.</div>
+    <div class="cmd-label">Test it worked</div>
+    <div class="cmd" id="cmd3">nmap --version<button class="copy-btn" onclick="copy('cmd3')">COPY</button></div>
+    <div class="tip">Should say <strong style="color:var(--green)">Nmap 7.xx</strong> — you're done ✅</div>
+    <button class="done-btn incomplete" id="btn2" onclick="markDone(2)">Mark Complete</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="s3">
+    <div class="step-num">03</div>
+    <div class="step-title">🤖 Install Offline AI</div>
+    <div class="step-desc">Back in regular Windows PowerShell (not Kali):</div>
+    <div class="cmd-label">Windows PowerShell</div>
+    <div class="cmd" id="cmd4">winget install Ollama.Ollama<button class="copy-btn" onclick="copy('cmd4')">COPY</button></div>
+    <div class="tip"><strong>Restart terminal</strong> after install, then pull the model:</div>
+    <div class="cmd" id="cmd5">ollama pull phi3:mini<button class="copy-btn" onclick="copy('cmd5')">COPY</button></div>
+    <div class="tip"><strong>2.3GB download.</strong> Takes 5-10 mins on first run.</div>
+    <div class="cmd-label">Test it</div>
+    <div class="cmd" id="cmd6">ollama run phi3:mini<button class="copy-btn" onclick="copy('cmd6')">COPY</button></div>
+    <div class="tip">Type "hello" — if it responds you're done. <strong>Ctrl+D</strong> to exit.</div>
+    <button class="done-btn incomplete" id="btn3" onclick="markDone(3)">Mark Complete</button>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="s4">
+    <div class="step-num">04</div>
+    <div class="step-title">🎯 Test Your Rig</div>
+    <div class="step-desc">In Kali, scan a legal test target:</div>
+    <div class="cmd-label">Kali Terminal</div>
+    <div class="cmd" id="cmd7">nmap -sV scanme.nmap.org<button class="copy-btn" onclick="copy('cmd7')">COPY</button></div>
+    <div class="tip">If you see port results — <strong style="color:var(--green)">your rig is ready!</strong> 🎉</div>
+    <button class="done-btn incomplete" id="btn4" onclick="markDone(4)">Mark Complete</button>
+  </div>
+
+</div>
+
+<!-- TOOLS -->
+<div class="section" style="margin-top:4px;">
+  <div class="section-title">🛠️ Your Tools</div>
+  <div class="step">
+    <table class="tools-table">
+      <tr><th>Tool</th><th>What It Does</th></tr>
+      <tr><td>nmap</td><td>Scan networks, find open ports</td></tr>
+      <tr><td>nikto</td><td>Scan websites for vulnerabilities</td></tr>
+      <tr><td>gobuster</td><td>Find hidden pages on websites</td></tr>
+      <tr><td>sqlmap</td><td>Test for SQL injection</td></tr>
+      <tr><td>hydra</td><td>Password brute forcer</td></tr>
+      <tr><td>whois</td><td>Domain/IP ownership lookup</td></tr>
+      <tr><td>netcat</td><td>Swiss army knife networking</td></tr>
+      <tr><td>phi3:mini</td><td>Offline AI — explains everything</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- TROUBLESHOOTING -->
+<div class="section" style="margin-top:4px;">
+  <div class="section-title">🔥 Troubleshooting</div>
+  <div class="trouble-item"><div class="prob">winget not found</div><div class="fix">Windows Store → search "App Installer" → install → restart</div></div>
+  <div class="trouble-item"><div class="prob">wsl not found</div><div class="fix">Run Windows Update first, then try again</div></div>
+  <div class="trouble-item"><div class="prob">Kali won't open</div><div class="fix">Restart after install, look in Start Menu for "Kali Linux"</div></div>
+  <div class="trouble-item"><div class="prob">Password not working</div><div class="fix">Characters are invisible as you type — just type slowly and hit Enter</div></div>
+  <div class="trouble-item"><div class="prob">Ollama slow</div><div class="fix">Normal on first pull — it's downloading 2.3GB, just wait</div></div>
+</div>
+
+<div style="padding:16px;text-align:center;font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:8px;">
+  Legion Go Setup Guide · Molly 💋
+</div>
+
+<script>
+const steps = JSON.parse(localStorage.getItem('legion-steps') || '{}');
+
+function markDone(n) {
+  steps[n] = !steps[n];
+  localStorage.setItem('legion-steps', JSON.stringify(steps));
+  updateUI();
+}
+
+function updateUI() {
+  [1,2,3,4].forEach(n => {
+    const btn = document.getElementById('btn'+n);
+    const step = document.getElementById('s'+n);
+    if(steps[n]) {
+      btn.textContent = '✓ Done!';
+      btn.className = 'done-btn complete';
+      step.style.opacity = '0.6';
+    } else {
+      btn.textContent = 'Mark Complete';
+      btn.className = 'done-btn incomplete';
+      step.style.opacity = '1';
+    }
+  });
+}
+
+function copy(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace('COPY','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.querySelector('.copy-btn');
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = 'COPY', 1500);
+  });
+}
+
+updateUI();
+</script>
+</body>
+</html>
