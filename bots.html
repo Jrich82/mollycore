@@ -145,7 +145,20 @@
   <div class="summary-stat"><span class="v" id="clockEl">--:--:--</span><span class="l">Local Time</span></div>
 </div>
 
+<div style="padding:16px 24px 0;">
+  <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;">
+    💻 LAPTOP BOTS
+  </div>
+</div>
 <div class="grid" id="botGrid"></div>
+
+<div style="padding:16px 24px 0;border-top:1px solid var(--border);margin-top:8px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+    <div style="font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;">🖥️ GAMING RIG BOTS <span style="color:#555">(JONZ-POWDER — C:\Bots-69)</span></div>
+  </div>
+  <div style="font-size:0.72rem;color:#444;margin-bottom:16px;font-family:'Space Mono',monospace;">Commands copy to clipboard — run from C:\Bots-69 on the gaming rig</div>
+</div>
+<div class="grid" id="rigGrid"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -255,6 +268,56 @@ const BOTS = [
     tags: ['Static', 'Vercel', 'Live'],
     color: '#00f5d4',
     alwaysOn: true,
+  },
+];
+
+// Gaming Rig bots (C:\Bots-69 on JONZ-POWDER)
+const RIG_BOTS = [
+  {
+    id: 'rig-munchies',
+    name: 'Maineiac Munchies Bot',
+    emoji: '🦞',
+    desc: 'Telegram bot for Maine-iac Munchies store',
+    command: 'python maineiac_bot.py',
+    startBat: 'StartMaineiacBot.bat',
+    tags: ['Telegram', 'Munchies', 'Josi'],
+    color: '#ff2d78',
+  },
+  {
+    id: 'rig-mystic',
+    name: 'Maineiac Mystic Bot',
+    emoji: '🔮',
+    desc: 'AI psychic readings — $3.99/reading — Stripe live ✅',
+    command: 'python maineiac_mystic_bot.py',
+    tags: ['Telegram', 'Stripe', 'Gemma4'],
+    color: '#8b00ff',
+  },
+  {
+    id: 'rig-agent',
+    name: 'TheRuralDegen Poster',
+    emoji: '🤠',
+    desc: 'Auto-posts 3x/day via Gemma 4 — 7AM/1PM/6PM',
+    command: 'python rig_agent.py',
+    tags: ['Gemma4', 'Telegram', 'X', 'Free'],
+    color: '#ffd60a',
+  },
+  {
+    id: 'rig-sibyl',
+    name: 'Sibyl Bot',
+    emoji: '🔯',
+    desc: 'Oracle/prediction bot',
+    command: 'python sibyl_bot.py',
+    tags: ['Telegram', 'Python'],
+    color: '#00f5d4',
+  },
+  {
+    id: 'rig-kronos',
+    name: 'Kronos API',
+    emoji: '⏱️',
+    desc: 'Kronos backend API service',
+    command: 'python kronos_api.py',
+    tags: ['FastAPI', 'Python'],
+    color: '#ff8c00',
   },
 ];
 
@@ -419,8 +482,49 @@ setInterval(() => {
   document.getElementById('clockEl').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
 }, 1000);
 
+// ── Rig Grid ─────────────────────────────────────────────────────────────────
+function renderRigGrid() {
+  const grid = document.getElementById('rigGrid');
+  grid.innerHTML = RIG_BOTS.map(bot => {
+    return `
+    <div class="bot-card stopped" id="rig-card-${bot.id}" style="border-color:rgba(139,0,255,0.2)">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${bot.color}44,${bot.color}22)"></div>
+      <div class="card-header">
+        <div class="card-left">
+          <span class="card-emoji">${bot.emoji}</span>
+          <div>
+            <div class="card-name">${bot.name}</div>
+            <div class="card-desc">${bot.desc}</div>
+          </div>
+        </div>
+        <span class="status-pill status-stopped" style="color:#555;border-color:#222">🖥️ RIG</span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <div class="meta-row">🏷️ ${bot.tags.map(t => `<span>${t}</span>`).join(' · ')}</div>
+          <div class="meta-row">⌨️ <span style="color:#555;font-size:0.6rem">cd C:\\Bots-69 &amp;&amp; ${bot.startBat || bot.command}</span></div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-start" onclick="copyRigCmd('${bot.id}')" style="flex:2">📲 Copy Command</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copyRigCmd(id) {
+  const bot = RIG_BOTS.find(b => b.id === id);
+  const cmd = bot.startBat
+    ? `cd C:\\Bots-69 && ${bot.startBat}`
+    : `cd C:\\Bots-69 && ${bot.command}`;
+  navigator.clipboard.writeText(cmd).then(() => {
+    toast(`📲 Copied! Paste in PowerShell on the gaming rig: ${bot.name}`);
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderGrid();
+renderRigGrid();
 </script>
 </body>
 </html>
