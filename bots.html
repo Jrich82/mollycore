@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤖 Bot Control — Molly//Core</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  :root {
+    --dark: #08080f; --panel: #0e0e1a; --border: #1a1a2e;
+    --pink: #ff2d78; --cyan: #00f5d4; --gold: #ffd60a;
+    --green: #00ff87; --red: #ff4444; --purple: #8b00ff;
+    --text: #e8e8f0; --muted: #6b6b8a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--dark); color:var(--text); font-family:'Space Grotesk',sans-serif; min-height:100vh; }
+
+  /* Header */
+  .header {
+    background:linear-gradient(135deg,#0d0d1a,#130820);
+    border-bottom:1px solid var(--border);
+    padding:20px 24px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .header-left { display:flex; align-items:center; gap:12px; }
+  .header-title { font-family:'Space Mono',monospace; font-size:1.1rem; color:var(--cyan); }
+  .header-sub { font-size:0.75rem; color:var(--muted); }
+  .header-status { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:0.72rem; }
+  .pulse { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+  /* Grid */
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; padding:24px; }
+
+  /* Bot Card */
+  .bot-card {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; transition:border-color 0.2s;
+    position:relative;
+  }
+  .bot-card.running { border-color: rgba(0,255,135,0.4); }
+  .bot-card.running::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--green),var(--cyan));
+  }
+  .bot-card.stopped::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:var(--border);
+  }
+
+  .card-header { padding:16px 16px 12px; display:flex; align-items:flex-start; justify-content:space-between; }
+  .card-left { display:flex; align-items:center; gap:10px; }
+  .card-emoji { font-size:1.8rem; }
+  .card-name { font-weight:700; font-size:1rem; }
+  .card-desc { font-size:0.72rem; color:var(--muted); margin-top:2px; }
+  .status-pill {
+    font-family:'Space Mono',monospace; font-size:0.6rem; font-weight:700;
+    padding:3px 10px; border-radius:10px; letter-spacing:1px; white-space:nowrap;
+  }
+  .status-running { background:rgba(0,255,135,0.12); color:var(--green); border:1px solid rgba(0,255,135,0.3); }
+  .status-stopped { background:rgba(107,107,138,0.12); color:var(--muted); border:1px solid var(--border); }
+  .status-error { background:rgba(255,68,68,0.12); color:var(--red); border:1px solid rgba(255,68,68,0.3); }
+
+  .card-body { padding:0 16px 12px; }
+  .card-meta { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
+  .meta-row { display:flex; align-items:center; gap:6px; font-size:0.72rem; color:var(--muted); }
+  .meta-row span { color:var(--text); font-family:'Space Mono',monospace; font-size:0.68rem; }
+
+  .log-box {
+    background:#050508; border:1px solid #111; border-radius:8px;
+    padding:8px 10px; height:70px; overflow-y:auto;
+    font-family:'Space Mono',monospace; font-size:0.62rem; color:#555;
+    margin-bottom:12px; line-height:1.6;
+  }
+  .log-box .log-line { color:#3a3; }
+  .log-box .log-line.err { color:#a33; }
+  .log-box .log-line.info { color:#336; }
+
+  .card-actions { display:flex; gap:8px; }
+  .btn {
+    flex:1; padding:9px; border-radius:10px; border:none; cursor:pointer;
+    font-family:'Space Mono',monospace; font-size:0.7rem; font-weight:700;
+    letter-spacing:0.5px; transition:all 0.15s;
+  }
+  .btn-start { background:rgba(0,255,135,0.15); color:var(--green); border:1px solid rgba(0,255,135,0.3); }
+  .btn-start:hover { background:rgba(0,255,135,0.25); }
+  .btn-stop { background:rgba(255,68,68,0.15); color:var(--red); border:1px solid rgba(255,68,68,0.3); }
+  .btn-stop:hover { background:rgba(255,68,68,0.25); }
+  .btn-open { background:rgba(0,245,212,0.1); color:var(--cyan); border:1px solid rgba(0,245,212,0.2); }
+  .btn-open:hover { background:rgba(0,245,212,0.2); }
+  .btn:disabled { opacity:0.3; cursor:not-allowed; }
+
+  /* Summary bar */
+  .summary {
+    display:flex; gap:16px; padding:12px 24px;
+    border-bottom:1px solid var(--border); background:rgba(0,0,0,0.3);
+    flex-wrap:wrap;
+  }
+  .summary-stat { font-family:'Space Mono',monospace; font-size:0.7rem; }
+  .summary-stat .v { color:var(--cyan); font-size:0.9rem; font-weight:700; display:block; }
+  .summary-stat .l { color:var(--muted); }
+
+  /* Toast */
+  .toast {
+    position:fixed; bottom:24px; right:24px; z-index:999;
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:12px 18px; font-size:0.8rem; display:none;
+    animation:slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  /* Nav */
+  .nav { padding:12px 24px; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:center; }
+  .nav a { font-size:0.72rem; color:var(--muted); text-decoration:none; font-family:'Space Mono',monospace;
+    padding:4px 10px; border-radius:6px; border:1px solid transparent; }
+  .nav a:hover { border-color:var(--border); color:var(--text); }
+  .nav a.active { color:var(--cyan); border-color:rgba(0,245,212,0.3); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span style="font-size:1.8rem">🤖</span>
+    <div>
+      <div class="header-title">BOT CONTROL CENTER</div>
+      <div class="header-sub">Molly//Core · Jon's bots, one place</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="pulse"></div>
+    <span id="headerStatus">Loading...</span>
+  </div>
+</div>
+
+<div class="nav">
+  <a href="index.html">⚡ Home</a>
+  <a href="portfolio.html">📁 Portfolio</a>
+  <a href="bots.html" class="active">🤖 Bots</a>
+</div>
+
+<div class="summary">
+  <div class="summary-stat"><span class="v" id="totalBots">0</span><span class="l">Total Bots</span></div>
+  <div class="summary-stat"><span class="v" id="runningCount" style="color:var(--green)">0</span><span class="l">Running</span></div>
+  <div class="summary-stat"><span class="v" id="stoppedCount" style="color:var(--muted)">0</span><span class="l">Stopped</span></div>
+  <div class="summary-stat"><span class="v" id="clockEl">--:--:--</span><span class="l">Local Time</span></div>
+</div>
+
+<div class="grid" id="botGrid"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Bot registry ─────────────────────────────────────────────────────────────
+// Each bot has: id, name, emoji, desc, type, command, url (optional), tags
+const BOTS = [
+  {
+    id: 'mariner-api',
+    name: 'Maineiac Mariner API',
+    emoji: '⚓',
+    desc: 'FastAPI backend — NOAA tides, weather, Captain AI',
+    type: 'python',
+    command: 'python3.13 C:\\Users\\jonny\\Projects\\maineiac-mariner\\api.py',
+    startBat: 'C:\\Users\\jonny\\Projects\\maineiac-mariner\\start.bat',
+    url: 'http://localhost:8000/docs',
+    tags: ['FastAPI', 'NOAA', 'Port 8000'],
+    color: '#00f5d4',
+  },
+  {
+    id: 'mariner-bot',
+    name: 'Maineiac Mariner Bot',
+    emoji: '🌊',
+    desc: 'Telegram bot — Maine tide & weather alerts',
+    type: 'python',
+    command: 'python3.13 C:\\Users\\jonny\\Projects\\maineiac-mariner\\bot.py',
+    tags: ['Telegram', 'Python', 'NOAA'],
+    color: '#00f5d4',
+  },
+  {
+    id: 'coinbase-bot',
+    name: 'Coinbase Grid Bot',
+    emoji: '📈',
+    desc: 'BTC-USDT grid trading — $35 budget, 20 grids',
+    type: 'python',
+    command: 'python3.13 C:\\Users\\jonny\\Projects\\coinbase-bot\\main.py grid --pair BTC-USDT --budget 35 --grids 20',
+    startBat: 'C:\\Users\\jonny\\Projects\\coinbase-bot\\run.bat',
+    tags: ['Trading', 'Coinbase', 'BTC'],
+    color: '#ffd60a',
+  },
+  {
+    id: 'maineiac-snipe',
+    name: 'Maineiac Snipe',
+    emoji: '🎯',
+    desc: 'Solana token sniper — FastAPI backend + dashboard',
+    type: 'python',
+    command: 'python -m uvicorn api.server:app --reload --port 8000',
+    startBat: 'C:\\Users\\jonny\\Projects\\maineiac-snipe\\START.bat',
+    url: 'http://localhost:5173',
+    tags: ['Solana', 'Sniper', 'Devnet'],
+    color: '#8b00ff',
+  },
+  {
+    id: 'kalshi-bot',
+    name: 'Kalshi Arb Bot',
+    emoji: '🎲',
+    desc: 'Prediction market arbitrage — ~$27 active positions',
+    type: 'python',
+    command: 'python3.13 C:\\Users\\jonny\\Projects\\kalshi-bot\\kalshi_arb_bot.py',
+    startBat: 'C:\\Users\\jonny\\Projects\\kalshi-bot-archived\\run.bat',
+    tags: ['Kalshi', 'Arbitrage', 'Markets'],
+    color: '#ff2d78',
+  },
+  {
+    id: 'xmr-miner',
+    name: 'XMR Miner',
+    emoji: '⛏️',
+    desc: 'Monero mining — gulf.moneroocean.stream:10032',
+    type: 'bat',
+    startBat: 'C:\\Users\\jonny\\Projects\\xmr-miner\\portable\\START.bat',
+    tags: ['Monero', 'Mining', 'XMR'],
+    color: '#ff8c00',
+  },
+  {
+    id: 'maineiac-trader',
+    name: 'Maineiac Trader',
+    emoji: '💹',
+    desc: 'Full trading platform — Next.js + Supabase',
+    type: 'node',
+    command: 'npm run dev',
+    startBat: 'C:\\Users\\jonny\\Projects\\maineiac-trader\\start.bat',
+    url: 'https://maineiactrader.com',
+    tags: ['Next.js', 'Supabase', 'SaaS'],
+    color: '#00f5d4',
+  },
+  {
+    id: 'gh0st',
+    name: 'gh0st.lol',
+    emoji: '👻',
+    desc: 'Ethical hacking trainer — CEH prep with HEAT meter',
+    type: 'node',
+    command: 'npm run dev',
+    cwd: 'C:\\Users\\jonny\\Projects\\gh0st',
+    url: 'http://localhost:3000',
+    externalUrl: 'https://gh0st-lol.vercel.app',
+    tags: ['Next.js', 'CEH', 'Port 3000'],
+    color: '#00ff87',
+  },
+  {
+    id: 'mariner-web',
+    name: 'Maineiac Mariner Web',
+    emoji: '🗺️',
+    desc: 'Web dashboard — The Waze of the Water',
+    type: 'static',
+    url: 'https://web-ten-red-43.vercel.app',
+    localUrl: 'C:\\Users\\jonny\\Projects\\maineiac-mariner\\web\\index.html',
+    tags: ['Static', 'Vercel', 'Live'],
+    color: '#00f5d4',
+    alwaysOn: true,
+  },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const state = {};
+BOTS.forEach(b => { state[b.id] = { status: b.alwaysOn ? 'running' : 'stopped', log: [] }; });
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('botGrid');
+  grid.innerHTML = BOTS.map(bot => {
+    const s = state[bot.id];
+    const isRunning = s.status === 'running';
+    const isAlwaysOn = bot.alwaysOn;
+    return `
+    <div class="bot-card ${isRunning ? 'running' : 'stopped'}" id="card-${bot.id}">
+      <div class="card-header">
+        <div class="card-left">
+          <span class="card-emoji">${bot.emoji}</span>
+          <div>
+            <div class="card-name">${bot.name}</div>
+            <div class="card-desc">${bot.desc}</div>
+          </div>
+        </div>
+        <span class="status-pill ${isRunning ? 'status-running' : 'status-stopped'}" id="pill-${bot.id}">
+          ${isRunning ? '● RUNNING' : '○ STOPPED'}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <div class="meta-row">🏷️ ${bot.tags.map(t => `<span>${t}</span>`).join(' · ')}</div>
+          ${bot.command ? `<div class="meta-row">⌨️ <span style="color:#555;font-size:0.6rem">${bot.command.length > 55 ? bot.command.slice(0,55)+'…' : bot.command}</span></div>` : ''}
+        </div>
+        <div class="log-box" id="log-${bot.id}">
+          ${s.log.length ? s.log.map(l => `<div class="log-line ${l.type}">${l.text}</div>`).join('') : '<span style="color:#222">No activity yet</span>'}
+        </div>
+        <div class="card-actions">
+          ${isAlwaysOn ? `
+            <button class="btn btn-open" onclick="openBot('${bot.id}')">🌐 Open</button>
+          ` : `
+            <button class="btn btn-start" id="btn-start-${bot.id}" onclick="startBot('${bot.id}')" ${isRunning ? 'disabled' : ''}>▶ Start</button>
+            <button class="btn btn-stop" id="btn-stop-${bot.id}" onclick="stopBot('${bot.id}')" ${!isRunning ? 'disabled' : ''}>■ Stop</button>
+            ${(bot.url || bot.externalUrl) ? `<button class="btn btn-open" onclick="openBot('${bot.id}')">🔗 Open</button>` : ''}
+          `}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateSummary();
+}
+
+function updateSummary() {
+  const running = Object.values(state).filter(s => s.status === 'running').length;
+  const total = BOTS.length;
+  document.getElementById('totalBots').textContent = total;
+  document.getElementById('runningCount').textContent = running;
+  document.getElementById('stoppedCount').textContent = total - running;
+  document.getElementById('headerStatus').textContent = `${running} of ${total} running`;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+function addLog(id, text, type = '') {
+  const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+  state[id].log.push({ text: `[${time}] ${text}`, type });
+  if (state[id].log.length > 12) state[id].log.shift();
+  const logEl = document.getElementById(`log-${id}`);
+  if (logEl) {
+    logEl.innerHTML = state[id].log.map(l => `<div class="log-line ${l.type}">${l.text}</div>`).join('');
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+}
+
+function setStatus(id, status) {
+  state[id].status = status;
+  const card = document.getElementById(`card-${id}`);
+  const pill = document.getElementById(`pill-${id}`);
+  const btnStart = document.getElementById(`btn-start-${id}`);
+  const btnStop = document.getElementById(`btn-stop-${id}`);
+  if (!card) return;
+  card.className = `bot-card ${status === 'running' ? 'running' : 'stopped'}`;
+  if (pill) {
+    pill.className = `status-pill ${status === 'running' ? 'status-running' : status === 'error' ? 'status-error' : 'status-stopped'}`;
+    pill.textContent = status === 'running' ? '● RUNNING' : status === 'error' ? '✗ ERROR' : '○ STOPPED';
+  }
+  if (btnStart) btnStart.disabled = status === 'running';
+  if (btnStop) btnStop.disabled = status !== 'running';
+  updateSummary();
+}
+
+function startBot(id) {
+  const bot = BOTS.find(b => b.id === id);
+  if (!bot) return;
+
+  setStatus(id, 'running');
+  addLog(id, `Starting ${bot.name}...`, 'info');
+
+  // Build the launch command
+  let launchCmd = '';
+  if (bot.startBat) {
+    launchCmd = `start cmd /k "${bot.startBat}"`;
+  } else if (bot.type === 'python' && bot.command) {
+    launchCmd = `start cmd /k "${bot.command}"`;
+  } else if (bot.type === 'node' && bot.cwd) {
+    launchCmd = `start cmd /k "cd /d ${bot.cwd} && ${bot.command}"`;
+  } else if (bot.command) {
+    launchCmd = `start cmd /k "${bot.command}"`;
+  }
+
+  // Copy command to clipboard for manual paste if needed
+  if (launchCmd) {
+    // Build a PowerShell one-liner the user can run
+    const psCmd = bot.startBat
+      ? `Start-Process "${bot.startBat}"`
+      : bot.cwd
+        ? `Start-Process powershell -ArgumentList '-NoExit','-Command','cd "${bot.cwd}"; ${bot.command}'`
+        : `Start-Process powershell -ArgumentList '-NoExit','-Command','${bot.command}'`;
+
+    navigator.clipboard.writeText(psCmd).then(() => {
+      addLog(id, 'Command copied to clipboard — paste in PowerShell', '');
+      toast(`📋 Command copied! Paste in PowerShell to launch ${bot.name}`);
+    }).catch(() => {
+      addLog(id, launchCmd, '');
+      toast(`Copy this to PowerShell: ${launchCmd}`);
+    });
+  }
+
+  addLog(id, `${bot.name} marked as running`, 'log-line');
+  if (bot.url && bot.url.startsWith('http')) {
+    setTimeout(() => addLog(id, `→ ${bot.url}`, ''), 1000);
+  }
+}
+
+function stopBot(id) {
+  const bot = BOTS.find(b => b.id === id);
+  setStatus(id, 'stopped');
+  addLog(id, `${bot.name} marked stopped. Close its PowerShell window to fully stop.`, 'err');
+  toast(`${bot.emoji} ${bot.name} marked stopped`);
+}
+
+function openBot(id) {
+  const bot = BOTS.find(b => b.id === id);
+  const url = bot.externalUrl || bot.url;
+  if (url && url.startsWith('http')) {
+    window.open(url, '_blank');
+    addLog(id, `Opened ${url}`, '');
+  } else if (bot.localUrl) {
+    toast(`Open this file: ${bot.localUrl}`);
+    navigator.clipboard.writeText(bot.localUrl);
+  }
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+// ── Clock ─────────────────────────────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('clockEl').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+}, 1000);
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderGrid();
+</script>
+</body>
+</html>
