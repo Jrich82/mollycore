@@ -204,6 +204,38 @@
 
   #start-btn:hover { background: #ff8855; }
 
+  /* Projectiles */
+  .projectile {
+    position: absolute;
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 30;
+    animation: fly 0.6s ease-in forwards;
+  }
+
+  @keyframes fly {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(2) translateY(-30px); }
+  }
+
+  .proj-left {
+    animation: fly-right 0.5s ease-in forwards;
+  }
+
+  .proj-right {
+    animation: fly-left 0.5s ease-in forwards;
+  }
+
+  @keyframes fly-right {
+    from { left: 20%; top: 50%; opacity: 1; }
+    to { left: 65%; top: 40%; opacity: 0; transform: scale(1.5); }
+  }
+
+  @keyframes fly-left {
+    from { right: 20%; top: 50%; opacity: 1; }
+    to { right: 65%; top: 40%; opacity: 0; transform: scale(1.5); }
+  }
+
   /* Winner overlay */
   #winner-overlay {
     display: none;
@@ -297,6 +329,29 @@
 </div>
 
 <script>
+const ATTACKS = {
+  molly: ['🔥','⚡','💫','🦞','💥','✨','🚀','💢'],
+  conflict: ['💀','🌀','⚫','👾','🔴','💣','🌑','😈'],
+};
+
+function fireProjectile(attacker) {
+  const ring = document.getElementById('ring');
+  const proj = document.createElement('div');
+  proj.className = 'projectile ' + (attacker === 'molly' ? 'proj-left' : 'proj-right');
+  const attacks = ATTACKS[attacker];
+  proj.textContent = attacks[Math.floor(Math.random() * attacks.length)];
+  // random vertical position
+  proj.style.top = (35 + Math.random() * 20) + '%';
+  if (attacker === 'molly') proj.style.left = '20%';
+  else proj.style.right = '20%';
+  ring.appendChild(proj);
+  setTimeout(() => proj.remove(), 600);
+  // Flash the defender
+  const defender = document.getElementById(attacker === 'molly' ? 'conflict' : 'molly');
+  defender.classList.add('flash');
+  setTimeout(() => defender.classList.remove('flash'), 200);
+}
+
 const MATCH_SCRIPT = [
   { delay: 500,  type: 'ref',      text: '🔔 DING DING DING! Match begins! Molly vs The Conflict for the Railway Deployment Championship!' },
   { delay: 1200, type: 'crowd',    text: '👥 CROWD: DROP PENDING UPDATES! DROP PENDING UPDATES!' },
@@ -376,7 +431,11 @@ function startMatch() {
   MATCH_SCRIPT.forEach(event => {
     setTimeout(() => {
       addLog(event.text, event.type);
-      if (event.dmg) updateHP(event.dmg.target, event.dmg.amount);
+      if (event.dmg) {
+        const attacker = event.dmg.target === 'molly' ? 'conflict' : 'molly';
+        fireProjectile(attacker);
+        setTimeout(() => updateHP(event.dmg.target, event.dmg.amount), 300);
+      }
       if (event.winner) showWinner(event.winner);
     }, event.delay);
   });
