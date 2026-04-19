@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeWrestling // MOLLY vs THE CONFLICT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #arena {
+    background: linear-gradient(180deg, #1a0030 0%, #0a0010 60%, #111 60%, #111 100%);
+    border-bottom: 4px solid #ff6b35;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Crowd */
+  #crowd {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    padding-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .crowd-member {
+    width: 12px;
+    height: 20px;
+    border-radius: 50% 50% 0 0;
+    animation: cheer 0.5s infinite alternate;
+  }
+
+  @keyframes cheer {
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
+  }
+
+  /* Ring */
+  #ring {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 40px;
+  }
+
+  /* Fighters */
+  .fighter {
+    text-align: center;
+    position: relative;
+  }
+
+  .fighter-sprite {
+    font-size: 80px;
+    display: block;
+    filter: drop-shadow(0 0 20px currentColor);
+    transition: transform 0.1s;
+  }
+
+  .fighter-name {
+    font-size: 8px;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  .health-bar-wrap {
+    width: 160px;
+    height: 16px;
+    background: #111;
+    border: 2px solid #444;
+    border-radius: 4px;
+    margin: 8px auto 0;
+    overflow: hidden;
+  }
+
+  .health-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .health-text {
+    font-size: 7px;
+    margin-top: 4px;
+    color: #aaa;
+  }
+
+  #molly .fighter-name { color: #ff6b35; }
+  #molly .health-bar { background: #ff6b35; }
+  #conflict .fighter-name { color: #00ffff; }
+  #conflict .health-bar { background: #00ffff; }
+
+  /* VS */
+  #vs {
+    font-size: 28px;
+    color: #ff6b35;
+    text-shadow: 0 0 20px #ff6b35;
+    animation: pulse 1s infinite alternate;
+    position: relative;
+    z-index: 10;
+  }
+
+  @keyframes pulse {
+    from { opacity: 0.6; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1.05); }
+  }
+
+  /* Commentary */
+  #commentary-box {
+    background: #000;
+    border-top: 3px solid #ff6b35;
+    padding: 12px 20px;
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #commentary-title {
+    font-size: 7px;
+    color: #ff6b35;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+
+  #commentary {
+    font-size: 9px;
+    line-height: 2;
+    color: #ccc;
+    overflow-y: auto;
+    height: 130px;
+  }
+
+  .log-line {
+    opacity: 0;
+    animation: fadein 0.3s forwards;
+    padding: 2px 0;
+  }
+
+  .log-molly { color: #ff6b35; }
+  .log-conflict { color: #00ffff; }
+  .log-crowd { color: #ffd700; }
+  .log-ref { color: #aaa; font-style: italic; }
+  .log-win { color: #00ff88; font-size: 11px; }
+
+  @keyframes fadein {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Flash */
+  .flash {
+    animation: flashanim 0.2s;
+  }
+  @keyframes flashanim {
+    0% { filter: brightness(3); }
+    100% { filter: brightness(1); }
+  }
+
+  .shake {
+    animation: shakeanim 0.3s;
+  }
+  @keyframes shakeanim {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+    100% { transform: translateX(0); }
+  }
+
+  /* Start button */
+  #start-btn {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ff6b35;
+    color: #000;
+    border: none;
+    padding: 16px 32px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    z-index: 100;
+    animation: pulse 0.8s infinite alternate;
+  }
+
+  #start-btn:hover { background: #ff8855; }
+
+  /* Winner overlay */
+  #winner-overlay {
+    display: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  #winner-overlay.show { display: flex; }
+
+  #winner-text {
+    font-size: 20px;
+    color: #00ff88;
+    text-shadow: 0 0 30px #00ff88;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  #replay-btn {
+    background: #00ff88;
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 16px;
+  }
+
+  #match-title {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    color: #ffd700;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    z-index: 20;
+  }
+</style>
+</head>
+<body>
+
+<div id="arena">
+  <div id="match-title">⚡ CODEWRESTLING CHAMPIONSHIP ⚡ EPISODE 1</div>
+  
+  <div id="crowd"></div>
+
+  <div id="ring">
+    <div class="fighter" id="molly">
+      <span class="fighter-sprite">🦞</span>
+      <div class="fighter-name">MOLLY</div>
+      <div class="health-bar-wrap">
+        <div class="health-bar" id="molly-hp" style="width:100%"></div>
+      </div>
+      <div class="health-text" id="molly-hp-text">HP: 100</div>
+    </div>
+
+    <div id="vs">VS</div>
+
+    <div class="fighter" id="conflict">
+      <span class="fighter-sprite">💀</span>
+      <div class="fighter-name">THE CONFLICT</div>
+      <div class="health-bar-wrap">
+        <div class="health-bar" id="conflict-hp" style="width:100%"></div>
+      </div>
+      <div class="health-text" id="conflict-hp-text">HP: 100</div>
+    </div>
+  </div>
+
+  <button id="start-btn" onclick="startMatch()">▶ START MATCH</button>
+
+  <div id="winner-overlay">
+    <div id="winner-text"></div>
+    <div style="font-size:8px; color:#aaa; text-align:center; max-width:300px; line-height:2">
+      NEXT MATCH:<br>MOLLY vs THE STACK TRACE
+    </div>
+    <button id="replay-btn" onclick="resetMatch()">↺ REMATCH</button>
+  </div>
+</div>
+
+<div id="commentary-box">
+  <div id="commentary-title">📻 LIVE COMMENTARY</div>
+  <div id="commentary"></div>
+</div>
+
+<script>
+const MATCH_SCRIPT = [
+  { delay: 500,  type: 'ref',      text: '🔔 DING DING DING! Match begins! Molly vs The Conflict for the Railway Deployment Championship!' },
+  { delay: 1200, type: 'crowd',    text: '👥 CROWD: DROP PENDING UPDATES! DROP PENDING UPDATES!' },
+  { delay: 2000, type: 'conflict', text: '💀 The Conflict opens with GETUPDATE SPAM! Flooding the polling endpoint!', dmg: { target: 'molly', amount: 15 } },
+  { delay: 2800, type: 'molly',    text: '🦞 Molly fires back — git push origin main! Clean commit!', dmg: { target: 'conflict', amount: 10 } },
+  { delay: 3600, type: 'conflict', text: '💀 409 CONFLICT ERROR from behind! Referee Railway looks the other way!', dmg: { target: 'molly', amount: 20 } },
+  { delay: 4200, type: 'crowd',    text: '👥 CROWD: BOOOO! RAILWAY IS CORRUPT! BOOOO!' },
+  { delay: 5000, type: 'ref',      text: '📻 Molly is down! HP critical! Can she recover?!' },
+  { delay: 5800, type: 'molly',    text: '🦞 Molly reaches into her toolkit — revoke bot token! Nuclear option!', dmg: { target: 'conflict', amount: 25 } },
+  { delay: 6600, type: 'conflict', text: '💀 The Conflict retaliates — InvalidURL NEWLINE INJECTION! Dirty move!', dmg: { target: 'molly', amount: 15 } },
+  { delay: 7400, type: 'crowd',    text: '👥 CROWD: MOL-LY! MOL-LY! MOL-LY!' },
+  { delay: 8200, type: 'molly',    text: '🦞 Molly locks in THE WEBHOOK HOLD — switches to webhook mode!', dmg: { target: 'conflict', amount: 30 } },
+  { delay: 9000, type: 'conflict', text: '💀 The Conflict is fading... tries one last STALE PROCESS attack!', dmg: { target: 'molly', amount: 5 } },
+  { delay: 9800, type: 'molly',    text: '🦞 Molly counters — numReplicas=1 SUBMISSION HOLD! The Conflict can\'t escape!', dmg: { target: 'conflict', amount: 35 } },
+  { delay: 10600, type: 'ref',     text: '📻 The Conflict is down! Referee Railway counts... 1... 2... 3!' },
+  { delay: 11200, type: 'crowd',   text: '👥 CROWD: 🎉🎉🎉 MOLLY WINS! MOLLY WINS! 🎉🎉🎉' },
+  { delay: 12000, type: 'win',     text: '🏆 YOUR WINNER — AND STILL RAILWAY DEPLOYMENT CHAMPION — MOLLY!! 🦞', winner: 'molly' },
+];
+
+let mollyHP = 100;
+let conflictHP = 100;
+let running = false;
+
+function buildCrowd() {
+  const crowd = document.getElementById('crowd');
+  const colors = ['#ff6b35','#ffd700','#00ffff','#cc88ff','#00ff88','#ff4466'];
+  for (let i = 0; i < 120; i++) {
+    const m = document.createElement('div');
+    m.className = 'crowd-member';
+    m.style.background = colors[Math.floor(Math.random() * colors.length)];
+    m.style.height = (14 + Math.random() * 12) + 'px';
+    m.style.animationDelay = (Math.random() * 0.5) + 's';
+    m.style.animationDuration = (0.3 + Math.random() * 0.4) + 's';
+    crowd.appendChild(m);
+  }
+}
+
+function addLog(text, type) {
+  const box = document.getElementById('commentary');
+  const line = document.createElement('div');
+  line.className = `log-line log-${type}`;
+  line.textContent = text;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+function updateHP(target, amount) {
+  if (target === 'molly') {
+    mollyHP = Math.max(0, mollyHP - amount);
+    document.getElementById('molly-hp').style.width = mollyHP + '%';
+    document.getElementById('molly-hp-text').textContent = 'HP: ' + mollyHP;
+    document.getElementById('molly').classList.add('shake');
+    setTimeout(() => document.getElementById('molly').classList.remove('shake'), 300);
+  } else {
+    conflictHP = Math.max(0, conflictHP - amount);
+    document.getElementById('conflict-hp').style.width = conflictHP + '%';
+    document.getElementById('conflict-hp-text').textContent = 'HP: ' + conflictHP;
+    document.getElementById('conflict').classList.add('shake');
+    setTimeout(() => document.getElementById('conflict').classList.remove('shake'), 300);
+  }
+}
+
+function showWinner(winner) {
+  const overlay = document.getElementById('winner-overlay');
+  const text = document.getElementById('winner-text');
+  text.textContent = winner === 'molly' 
+    ? '🦞 MOLLY WINS!\nDEPLOYMENT SUCCESSFUL!' 
+    : '💀 THE CONFLICT WINS!\nDEPLOYMENT FAILED!';
+  overlay.classList.add('show');
+}
+
+function startMatch() {
+  if (running) return;
+  running = true;
+  document.getElementById('start-btn').style.display = 'none';
+  
+  MATCH_SCRIPT.forEach(event => {
+    setTimeout(() => {
+      addLog(event.text, event.type);
+      if (event.dmg) updateHP(event.dmg.target, event.dmg.amount);
+      if (event.winner) showWinner(event.winner);
+    }, event.delay);
+  });
+}
+
+function resetMatch() {
+  mollyHP = 100;
+  conflictHP = 100;
+  running = false;
+  document.getElementById('molly-hp').style.width = '100%';
+  document.getElementById('molly-hp-text').textContent = 'HP: 100';
+  document.getElementById('conflict-hp').style.width = '100%';
+  document.getElementById('conflict-hp-text').textContent = 'HP: 100';
+  document.getElementById('commentary').innerHTML = '';
+  document.getElementById('winner-overlay').classList.remove('show');
+  document.getElementById('start-btn').style.display = 'block';
+}
+
+buildCrowd();
+</script>
+</body>
+</html>
